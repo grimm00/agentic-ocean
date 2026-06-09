@@ -12,12 +12,14 @@ future second consumer.
 
 ## What's here
 
-| Dir | Contents |
-|-----|----------|
-| `skills/` | 14 core skills (`commit`, `decision`, `discuss`, `explore`, `handoff`, `int-opp`, `narrative`, `plan-review`, `pre-commit-review`, `reflect`, `research`, `spike`, `update-pr-description`, `write-plan`) |
-| `commands/` | 20 core commands (workflow: `agent-dispatch`, `task`, `pr-validation`, `post-pr`, `release-*`, `fix-*`, …) |
-| `agents/` | `group-cycle.agent.md`, `research-orchestrator/` |
-| `install.sh` | *(coming in Group 4)* — symlink-farm installer |
+All installable content lives under **`corpus/`** (separated from repo scaffolding):
+
+| Path | Contents |
+|------|----------|
+| `corpus/skills/` | 14 core skills (`commit`, `decision`, `discuss`, `explore`, `handoff`, `int-opp`, `narrative`, `plan-review`, `pre-commit-review`, `reflect`, `research`, `spike`, `update-pr-description`, `write-plan`) |
+| `corpus/commands/` | 20 core commands (workflow: `agent-dispatch`, `task`, `pr-validation`, `post-pr`, `release-*`, `fix-*`, …) |
+| `corpus/agents/` | `group-cycle.agent.md`, `research-orchestrator/` |
+| `install.sh` | *(coming in Group 4)* — symlink-farm installer; `corpus/` is the single payload root it maps from |
 
 ## Core vs personal
 
