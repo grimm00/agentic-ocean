@@ -1,5 +1,9 @@
 # Config vs Corpus (Theme 10)
 
+**Glossary:** the **corpus** is the actual skills/commands/agents content (this repo); the
+**mapping** is the `installer.yaml` that says which corpus entries symlink to which editor
+paths.
+
 Two distinct things, deliberately kept apart:
 
 | | Corpus | Config |
@@ -29,8 +33,9 @@ and the same separation behind tools like `git config`, `direnv`, and `mise`.
 ## See also
 
 - [`installer-schema.md`](installer-schema.md) — the `installer.yaml` mapping schema
-- dev-infra **ADR-002** (Installation & Distribution Architecture, Theme 10) — the source decision
+- [dev-infra **ADR-002** — Installation & Distribution Architecture](https://github.com/grimm00/dev-infra/blob/develop/admin/services/meta/features/skill-template-separation/decisions/adr-002-installation-architecture.md) (Theme 10) — the source decision
+- [dev-infra **ADR-001** — Corpus Repository Split Model](https://github.com/grimm00/dev-infra/blob/develop/admin/services/ai-workflow/features/skill-corpus-installation/decisions/adr-001-corpus-repo-split-model.md) — the core/personal split
 
 ---
 
-**Related:** ADR-002 (Theme 10), ADR-001 (core/personal split)
+**Related:** [ADR-002](https://github.com/grimm00/dev-infra/blob/develop/admin/services/meta/features/skill-template-separation/decisions/adr-002-installation-architecture.md) (Theme 10) · [ADR-001](https://github.com/grimm00/dev-infra/blob/develop/admin/services/ai-workflow/features/skill-corpus-installation/decisions/adr-001-corpus-repo-split-model.md) (core/personal split)
