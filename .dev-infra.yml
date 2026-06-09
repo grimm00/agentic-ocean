@@ -2,8 +2,8 @@
 # Placeholders are filled at project generation time.
 
 template: standard-project
-version: "[DEV_INFRA_VERSION]"
-created: "[CREATED_DATE]"
+version: "0.11.0+nightly.88fc037"
+created: "2026-06-09"
 
 # Bare skill directory names (global install). proj-cli warns if missing; never blocks setup.
 expected_skills:
