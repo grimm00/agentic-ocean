@@ -36,6 +36,9 @@ mapping from `~/.config/agentic-ocean/installer.yaml` and symlinks editor paths
 (`~/.cursor/skills/`, …) into this repo. Confirmed working on Cursor (C-INST-1). The
 `install.sh` lands in Group 4; until then this repo is the source of truth, manually linked.
 
+- [`docs/config-vs-corpus.md`](docs/config-vs-corpus.md) — why the mapping lives in `~/.config/` while the corpus lives here (Theme 10)
+- [`docs/installer-schema.md`](docs/installer-schema.md) — the `installer.yaml` mapping schema
+
 ## Versioning
 
 Independent of dev-infra — `agentic-ocean` releases on its own cadence (SemVer,
