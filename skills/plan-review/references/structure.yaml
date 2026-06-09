@@ -1,0 +1,114 @@
+# Declarative contract for plan-review inputs, review dimensions, and outputs.
+# Read alongside SKILL.md — authoritative glob semantics mirror write-plan parent.
+
+schema_version: 2
+skill: plan-review
+
+pipeline_integration:
+  between_group_cycles: >
+    Agentic multi-group pipelines (e.g. group-cycle / agent dispatch) MUST invoke this
+    skill after a merged prior-group PR and before expanding or executing the next
+    task group. Mirrors legacy pre-phase checkpoints while emitting the single
+    `plan-review-{yyyy}-{mm}-{dd}.md` artifact contract (standalone equivalent to ad-hoc runs).
+    Deprecated `/pre-phase-review` command stubs redirect to `/plan-review` / this skill.
+
+invocation_flags:
+  - id: feature
+    description: Explicit planning feature/topic name when multiple trees exist
+    typical_usage: "--feature my-feature"
+  - id: group
+    description: 1-based index into implementation-plan YAML groups array
+    typical_usage: "--group 2"
+  - id: check_deps
+    description: Emphasize dependency validation sections only (still writes full report unless dry-run)
+    typical_usage: "--check-deps"
+  - id: check_tests
+    description: Emphasize test-plan cues inside task markdown when present
+    typical_usage: "--check-tests"
+  - id: dry_run
+    description: Echo review to conversation only; do not write report file
+    typical_usage: "--dry-run"
+
+planning_roots:
+  dev_infra_feature:
+    description: Feature work under admin/services with uniform planning trees
+    base_glob: "admin/services/{service}/features/{feature}/"
+    default_subdir: planning
+    staged_planning_subdir_pattern: "planning-stage{N}/"
+    notes: |
+      Pick exactly ONE subdirectory per invocation: literal `planning/` OR `planning-stage{N}/`
+      where N is a positive integer (e.g. planning-stage3). Never silently merge staged dirs.
+      Record the chosen root in the review report header.
+  template_project:
+    description: Maintainer planning docs inside generated projects
+    base_glob: "docs/maintainers/planning/features/{feature}/"
+    staged_planning_subdir_pattern: null
+
+inputs:
+  singletons:
+    - filename: implementation-plan.md
+      role: YAML frontmatter task index + markdown checkbox mirror of tasks
+    - filename: status-and-next-steps.md
+      role: Progress table, milestones, narrative notes vs plan checkboxes
+  collections:
+    - pattern: "tasks/*.md"
+      role: Per-group task specs referenced by frontmatter groups[].file
+
+prior_stage_carry_forward:
+  description: >
+    When active planning root uses planning-stage{N}/ with N>1, explicitly verify the NEW stage plan
+    incorporates documented learnings from planning-stage{N-1}/ (and linked spikes/PR narratives).
+  suggested_reads:
+    - glob: "planning-stage{prev}/status-and-next-steps.md"
+      optional: false
+      role: Completed milestones + Notes often contain constraints for next stage
+    - glob: "planning-stage{prev}/implementation-plan.md"
+      optional: false
+      role: Residual unchecked items / deferred scope markers
+    - glob: "**/artifacts/*.md"
+      optional: true
+      role: Spike or audit narratives linked from prior status sections
+
+review_dimensions:
+  - id: plan_structure
+    description: Frontmatter internal consistency; checkbox census equals task_count; files exist
+  - id: task_groups
+    description: Group markdown structure; numbering aligns with groups[].tasks; sizing heuristics
+  - id: dependencies
+    description: Ordering within/across groups; external prerequisites; no backward deps
+  - id: consistency
+    description: Plan ↔ status ↔ task titles; phantom/orphan tasks
+  - id: prior_learnings
+    description: Stage-boundary carry-forward — risks called out in prior stage absorbed or consciously waived
+
+report_output:
+  singleton:
+    filename_pattern: "plan-review-{yyyy}-{mm}-{dd}.md"
+    location: Same planning root chosen for inputs (alongside implementation-plan.md)
+    template_asset: assets/review-checklist.md
+  dry_run_destination: conversation_only
+
+implementation_plan_frontmatter:
+  authoritative_parallel: >-
+    Same structural obligations as write-plan/references/structure.yaml —
+    validate task_count, groups[].{name,file,tasks}, tasks_files ordering parity,
+    and global task ID coverage during reviews.
+  required_keys:
+    - task_count
+    - groups
+    - tasks_files
+  group_entry_shape:
+    name: string
+    file: string
+    tasks: list_of_integers
+
+readiness_levels:
+  - id: not_ready
+    label: "🔴 Not Ready"
+    implies: Blockers exist — halt implementation churn on this plan until resolved
+  - id: needs_work
+    label: "🟡 Needs Work"
+    implies: No hard blockers; warnings should be triaged before execution
+  - id: ready
+    label: "✅ Ready"
+    implies: Safe to proceed with scoped execution workflows

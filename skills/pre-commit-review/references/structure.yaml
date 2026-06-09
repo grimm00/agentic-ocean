@@ -1,0 +1,55 @@
+# Declarative contract for review skill — paths, artifact shape, coupling hooks.
+# Read alongside SKILL.md; YAML wins if any prose drifts.
+
+schema_version: 1
+skill: pre-commit-review
+
+invocation_aliases:
+  - id: legacy_command
+    description: Mirrors `.cursor/commands/review.md` slash usage
+    typical_usage: "/review [description] [--scope path] [--all]"
+
+review_roots:
+  dev_infra_structure:
+    description: Dev-infra repos with admin staging layout
+    detect_when:
+      - path_exists: admin/tmp
+      - or_path_exists: admin
+    artifact_base_dir: admin/tmp/reviews
+  template_structure:
+    description: Standard generated project with root tmp
+    detect_when:
+      - path_exists: tmp
+    artifact_base_dir: tmp/reviews
+  lightweight_structure:
+    description: Minimal tree without admin/ or tmp/
+    detect_when:
+      - default_fallback: true
+    artifact_base_dir: tests/tmp/reviews
+
+artifact_folder:
+  dirname_pattern: "review-{description}-{yyyy}-{mm}-{dd}"
+  gitignore_required: true
+  notes: |
+    Caller MUST verify `.gitignore` covers the chosen base. If not covered,
+    warn the user before writing artifacts.
+
+required_artifacts:
+  - filename: summary.md
+    role: Human-readable summary; copy from ../assets/summary-template.md then fill
+    coupling_note: Parsed or reused by downstream commit workflows in the same session
+  - filename: diff.patch
+    role: Staged diff capture via `git diff --staged` redirected to file
+    coupling_note: Source of truth for line-level review alongside summary
+
+git_expectations:
+  staged_diff_source: git diff --staged
+  stat_command: git diff --staged --stat
+
+integration:
+  commit_skill:
+    description: Second half of review-then-commit; consumes same review folder context
+    sibling_structure_yaml_relative: ../commit/references/structure.yaml
+    notes: >
+      Declare filenames here so commit SKILL can depend on stable names/paths.
+      Companion commit YAML points back via upstream_review_contract for paired edits.

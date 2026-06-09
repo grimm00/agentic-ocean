@@ -1,0 +1,22 @@
+# Dev-infra project metadata — canonical inventory: docs/DEV-INFRA-YML.md (keep lists in sync)
+# Placeholders are filled at project generation time.
+
+template: standard-project
+version: "[DEV_INFRA_VERSION]"
+created: "[CREATED_DATE]"
+
+# Bare skill directory names (global install). proj-cli warns if missing; never blocks setup.
+expected_skills:
+  - commit
+  - decision
+  - discuss
+  - explore
+  - handoff
+  - int-opp
+  - narrative
+  - plan-review
+  - pre-commit-review
+  - reflect
+  - research
+  - spike
+  - write-plan

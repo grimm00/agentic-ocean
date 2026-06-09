@@ -1,0 +1,34 @@
+# Declarative contract for handoff skill — transient markdown artifacts only.
+schema_version: 2
+skill: handoff
+
+handoff_roots:
+  dev_infra_structure:
+    description: Dev-infra repos with admin tmp layout
+    detect_when:
+      - path_exists: admin/tmp
+      - or_path_exists: admin
+    artifact_dir: admin/tmp/handoffs
+  template_structure:
+    description: Standard generated project layout
+    detect_when:
+      - path_exists: tmp
+    artifact_dir: tmp/handoffs
+  lightweight_structure:
+    description: Minimal tree fallback — file lives directly under tests/tmp/
+    detect_when:
+      - default_fallback: true
+    artifact_dir: tests/tmp
+
+output_file:
+  pattern: handoff-{topic}.md
+  gitignore_expected: true
+
+path_notes: |
+  Dev-infra and template layouts use their `artifact_dir` (each ends with `/handoffs/`).
+  Lightweight layout emits `tests/tmp/handoff-{topic}.md` (flat).
+
+resume_mode:
+  glob: handoff-*.md
+  search_order_roots: identical_to_detect_when_resolution
+  disambiguation: prompt_if_multiple_else_single_display

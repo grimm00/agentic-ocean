@@ -1,0 +1,51 @@
+# Declarative contract for commit skill — procedural review consume + cleanup.
+# Read alongside SKILL.md; YAML wins if any prose drifts.
+
+schema_version: 2
+skill: commit
+
+upstream_review_contract:
+  skill_id: pre-commit-review
+  structure_yaml_relative: ../pre-commit-review/references/structure.yaml
+  notes: >
+    Stable API surface for review→commit coupling. Filename keys, dirname_pattern,
+    and review_roots[].artifact_base_dir MUST stay aligned — coordinate changes atomically across both skills.
+
+consumes_review_artifacts:
+  required_files:
+    - filename: summary.md
+      role: >-
+        SOURCE for draft commit message under heading matching skill prose
+        (“## Draft Commit Message” section per pre-commit-summary template).
+      optional_extracts:
+        - files_changed_list_for_confirmation
+  optional_files:
+    - filename: diff.patch
+      role: Line-level corroboration if staged snapshot appears stale versus summary.
+
+review_folder_resolution_modes:
+  - id: same_session
+    description: Draft path + message already in assistant context after pre-commit-review
+    precedence: highest
+  - id: explicit_name
+    description: User passes folder token matching review dirname tail
+  - id: auto_latest
+    description: Newest lexicographic/mtime ordering across artifact bases from upstream contract
+
+artifact_bases_must_match_upstream: true
+
+git_commands:
+  staged_stat: git diff --staged --stat
+  last_commit_preview: git log -1 --oneline
+
+cli_options:
+  - flag: "--no-delete"
+    effect: Retain transient review folder after successful commit
+  - flag: "--message"
+    effect: Override draft parsed from summary.md
+
+outputs:
+  - id: git_commit
+    description: Conventional-commit message executed on repository
+  - id: transient_review_cleanup
+    description: Deleted review-* folder unless --no-delete

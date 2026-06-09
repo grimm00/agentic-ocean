@@ -1,0 +1,40 @@
+# Decision skill — declared outputs alongside assets/ templates.
+schema_version: 1
+skill: decision
+
+input_modes_expected:
+  - id: from_research
+    description: Research tree complete enough to articulate decision questions
+    notes: Mirrors legacy `/decision --from-research` intent
+
+planning_roots:
+  dev_infra_feature:
+    base_glob: "admin/services/{service}/features/{topic}/"
+    decisions_relative: decisions/
+    research_relative: research/
+  template_project:
+    base_glob: "docs/maintainers/decisions/{topic}/"
+    research_glob_hint: "docs/maintainers/research/{topic}/"
+
+outputs:
+  singletons_interview_first:
+    - filename: decisions/decision-interview.md
+      role: Structured human interview stub (copied/adapted from assets/decision-interview.md)
+      created_before_clustering: true
+  singletons_hub:
+    - filename: decisions/README.md
+      role: ADR hub + status table seeded from assets/hub-readme-template.md
+  collections_adrs:
+    - pattern: "decisions/adr-{nnn}-{kebab-summary}.md"
+      role: One ADR per decision point seeded from assets/adr-template.md
+      numbering_rule: >-
+        Leading zero-padded NNN matching lexical hub ordering; increments when inserting
+        new ADRs unless maintainers prescribe otherwise.
+  singleton_summary:
+    - filename: decisions/decisions-summary.md
+      role: One-screen rollup of ADR intents + requirements fallout
+  optional_parent_index_updates:
+    - filename: docs/maintainers/decisions/README.md
+      role: Mention topic only if file already lists cross-topic navigation
+    - filename: admin/decisions/README.md
+      role: Mention topic only if file already lists cross-topic navigation

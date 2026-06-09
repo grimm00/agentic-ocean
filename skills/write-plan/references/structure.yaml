@@ -1,0 +1,98 @@
+# Declarative contract for write-plan skill outputs and inputs.
+# Human and agent readers: use this alongside parent + child SKILL.md files.
+
+schema_version: 2
+skill: write-plan
+family_members:
+  - write-plan-setup
+  - write-plan-expand
+
+# Logical input channels (mirror legacy command flags; design.md usable as pseudo-artifacts).
+input_modes:
+  - id: from_adr
+    description: ADR directory or files under decisions/
+    typical_flags: ["--from-adr"]
+  - id: from_artifacts
+    description: Single artifact file (e.g. checklist, transition brief)
+    typical_flags: ["--from-artifacts"]
+  - id: from_reflection
+    description: Reflection doc; may imply artifact generation first
+    typical_flags: ["--from-reflection"]
+  - id: from_design
+    description: Feature design document (sections with goals, scope, staging)
+    typical_flags: ["--from-design"]
+    notes: Natural extension for Stage 3-style planning sourced from design.md
+
+# Where the planning tree is rooted on disk (one convention per invocation).
+planning_roots:
+  dev_infra_feature:
+    description: Feature work under admin/services
+    base_glob: "admin/services/{service}/features/{feature}/"
+    default_subdir: planning
+    staged_planning_subdir_pattern: "planning-stage{N}/"
+    notes: |
+      N is a 1-based positive integer (1, 2, 3, …). Directory name is literal prefix
+      "planning-stage" plus decimal digits (no zero-padding required): planning-stage3,
+      planning-stage12, etc.
+  template_project:
+    description: Maintainer docs layout in generated projects
+    base_glob: "docs/maintainers/planning/features/{feature}/"
+
+# Produced/updated artifacts by invocation (skills: write-plan-setup vs write-plan-expand).
+setup_output:
+  skill_invocation: write-plan-setup
+  creates_or_replaces_safe_scaffolding_only: true
+  directories:
+    - path: tasks
+      role: One markdown file per task group (initial skeleton)
+      naming: "{nn}-{group-slug}.md"
+  singletons:
+    - filename: implementation-plan.md
+      role: YAML frontmatter + checkbox task index matching task_count
+    - filename: status-and-next-steps.md
+      role: Empty/progress scaffolding + scripted next milestones
+  group_file_initial_status: "🔴 Scaffolding (needs expansion)"
+
+expand_output:
+  skill_invocation: write-plan-expand
+  mutates_collections_only: true
+  collections:
+    - pattern: "tasks/{target-group-md}"
+      role: Exactly one group's markdown deepened per run (Purpose/Steps/Acceptance)
+      promoted_status_when_complete: "✅ Expanded"
+  singletons_touch_policy: >
+    Rare advisory edits only (never strip the YAML frontmatter block inside
+    implementation-plan.md); root files should already exist before expand executes.
+
+# Shared layout reference (historic outputs block — identical coverage to setup + expand slices).
+outputs:
+  directories:
+    - path: tasks
+      role: One markdown file per task group
+      naming: "{nn}-{group-slug}.md"
+  singletons:
+    - filename: implementation-plan.md
+      role: YAML frontmatter + task index with GFM checkboxes
+      created_in: setup
+    - filename: status-and-next-steps.md
+      role: Progress table and next steps
+      created_in: setup
+  collections:
+    - pattern: "tasks/*.md"
+      role: Group files; Setup creates scaffolding; Expand deepens one group
+      setup_status: "🔴 Scaffolding (needs expansion)"
+      expanded_status: "✅ Expanded"
+
+implementation_plan_frontmatter:
+  required_keys:
+    - task_count
+    - groups
+    - tasks_files
+  group_entry_shape:
+    name: string
+    file: string
+    tasks: list_of_integers
+  tasks_files_must_match_groups: >
+    tasks_files MUST list groups[].file in the SAME order as groups[]; each declared
+    file occurs exactly once. groups[].tasks enumerates global task IDs owned by that
+    group's markdown checkboxes without gaps across the union of all groups.
