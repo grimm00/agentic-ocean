@@ -1,0 +1,26 @@
+# agentic-ocean installer mapping (EXAMPLE)
+#
+# Copy to ~/.config/agentic-ocean/installer.yaml and adjust paths per machine.
+# The installer (install.sh, Group 4) reads this and symlinks each entry under a
+# source's corpus/<kind>/ into the matching editor target dir.
+#
+# Schema: see docs/installer-schema.md
+
+schema_version: 1
+
+sources:
+  # Core corpus (this repo, public)
+  - name: agentic-ocean
+    root: ~/Projects/agentic-ocean/corpus
+    links:
+      skills: ~/.cursor/skills
+      commands: ~/.cursor/commands
+      agents: ~/.cursor/agents
+
+  # Personal corpus (private sibling)
+  - name: agentic-ocean-personal
+    root: ~/Projects/agentic-ocean-personal/corpus
+    links:
+      skills: ~/.cursor/skills
+      commands: ~/.cursor/commands
+      agents: ~/.cursor/agents
