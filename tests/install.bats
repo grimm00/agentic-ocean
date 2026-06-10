@@ -141,3 +141,41 @@ EOF
   [ "$status" -eq 0 ]
   [[ "$output" == *"skip"* ]]
 }
+
+# --- hardening: --help, config validation, flag guards ---------------------
+
+@test "--help lists every flag and exits 0" {
+  run bash "$INSTALL" --help
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"--uninstall"* ]]
+  [[ "$output" == *"--dry-run"* ]]
+  [[ "$output" == *"--force"* ]]
+  [[ "$output" == *"--strict"* ]]
+  [[ "$output" == *"--verbose"* ]]
+}
+
+@test "--force and --strict together is rejected" {
+  run bash "$INSTALL" --force --strict
+  [ "$status" -ne 0 ]
+  [[ "$output" == *"mutually exclusive"* ]]
+}
+
+@test "empty sources list errors clearly" {
+  cat > "$CONFIG" <<EOF
+schema_version: 1
+sources: []
+EOF
+  run bash "$INSTALL"
+  [ "$status" -ne 0 ]
+  [[ "$output" == *"sources"* ]]
+}
+
+@test "config missing the sources key errors clearly (no raw bash error)" {
+  cat > "$CONFIG" <<EOF
+schema_version: 1
+EOF
+  run bash "$INSTALL"
+  [ "$status" -ne 0 ]
+  [[ "$output" == *"sources"* ]]
+  [[ "$output" != *"integer expression expected"* ]]
+}

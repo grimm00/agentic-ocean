@@ -31,7 +31,19 @@ warn() { printf 'warning: %s\n' "$*" >&2; }
 log()  { printf '%s\n' "$*"; }
 vlog() { if [ "$VERBOSE" -eq 1 ]; then printf '%s\n' "$*"; fi; }
 
-usage() { sed -n '14,20p' "$0" | sed 's/^# \{0,1\}//'; }
+# Help text lives here (not parsed out of the header) so editing the top-of-file
+# comment can never desync --help.
+usage() {
+  cat <<'EOF'
+install.sh [--uninstall] [--dry-run] [--force] [--strict] [--verbose]
+
+  --uninstall   remove installer-created symlinks (corpus untouched)
+  --dry-run     print actions without changing the filesystem
+  --force       replace a conflicting target (real file / foreign symlink) — destructive
+  --strict      error on a divergent collision instead of skipping
+  --verbose     report skipped/unchanged entries too
+EOF
+}
 
 # True when two paths have the same content: files by bytes, dirs recursively.
 # Type mismatch (or anything we can't compare cleanly) => false (treated as divergent,
@@ -88,12 +100,20 @@ for_each_link() {
   local handler="$1"
   local src_count i name root kind target srcdir entry link
   src_count="$(yq '.sources | length' "$config_file")"
-  [ "$src_count" -gt 0 ] 2>/dev/null || err "no sources defined in $config_file"
+  # yq yields a number for a list, but 'null'/'' if 'sources:' is missing or unreadable.
+  # Validate explicitly so a malformed config gives our error, not a raw `[` failure.
+  case "$src_count" in
+    '' | *[!0-9]*) err "no readable 'sources:' list in $config_file" ;;
+  esac
+  [ "$src_count" -gt 0 ] || err "no sources defined in $config_file"
   for i in $(seq 0 "$((src_count - 1))"); do
     name="$(yq ".sources[$i].name" "$config_file")"
     root="$(expand_tilde "$(yq ".sources[$i].root" "$config_file")")"
     [ -d "$root" ] || err "source '$name': root not found: $root"
-    for kind in $(yq ".sources[$i].links | keys | .[]" "$config_file"); do
+    # Process substitution (not a pipe) so the loop runs in this shell and the
+    # n_changed/n_skipped increments inside the handler survive.
+    while IFS= read -r kind; do
+      [ -n "$kind" ] || continue
       target="$(expand_tilde "$(yq ".sources[$i].links.$kind" "$config_file")")"
       srcdir="$root/$kind"
       [ -d "$srcdir" ] || continue
@@ -102,7 +122,7 @@ for_each_link() {
         link="$target/$(basename "$entry")"
         "$handler" "$link" "$entry" "$target"
       done
-    done
+    done < <(yq ".sources[$i].links | keys | .[]" "$config_file")
   done
 }
 
