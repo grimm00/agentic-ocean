@@ -4,21 +4,29 @@
 #
 # Reads installer.yaml and symlinks each source's corpus/<kind>/<entry> into the
 # editor target dir named by the mapping. Symlink mode (C-INST-1 GO). Per-item links
-# so multiple sources can populate the same target dir. Idempotent; collision = error.
+# so multiple sources can populate the same target dir. Idempotent; collision = error
+# (unless --force).
 #
-#   install.sh              install (default)
-#   install.sh --uninstall  remove installer-created symlinks (corpus untouched)
+#   install.sh [--uninstall] [--dry-run] [--force] [--verbose]
+#
+#     --uninstall   remove installer-created symlinks (corpus untouched)
+#     --dry-run     print actions without changing the filesystem
+#     --force       replace a conflicting target (real file / foreign symlink)
+#     --verbose     report skipped/unchanged entries too
 #
 # Config lookup: $AGENTIC_OCEAN_CONFIG, else $XDG_CONFIG_HOME/agentic-ocean/installer.yaml,
 # else ~/.config/agentic-ocean/installer.yaml.
 #
-# Schema: docs/installer-schema.md. (Scope: Group 4 / Tasks 11–12 — install + uninstall.
-# Standard flags and the core→personal check arrive in Tasks 13–14.)
+# Schema: docs/installer-schema.md. (Scope: Group 4 / Tasks 11–13. The core→personal
+# check arrives in Task 14.)
 
 set -euo pipefail
 
-err() { printf 'error: %s\n' "$*" >&2; exit 1; }
-log() { printf '%s\n' "$*"; }
+err()  { printf 'error: %s\n' "$*" >&2; exit 1; }
+log()  { printf '%s\n' "$*"; }
+vlog() { if [ "$VERBOSE" -eq 1 ]; then printf '%s\n' "$*"; fi; }
+
+usage() { sed -n '2,18p' "$0" | sed 's/^# \{0,1\}//'; }
 
 expand_tilde() {
   case "$1" in
@@ -27,6 +35,20 @@ expand_tilde() {
     *)      printf '%s\n' "$1" ;;
   esac
 }
+
+# --- args ------------------------------------------------------------------
+mode="install"; DRY_RUN=0; FORCE=0; VERBOSE=0
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --uninstall)   mode="uninstall" ;;
+    --dry-run)     DRY_RUN=1 ;;
+    --force)       FORCE=1 ;;
+    --verbose|-v)  VERBOSE=1 ;;
+    -h|--help)     usage; exit 0 ;;
+    *)             err "unknown argument: $1 (see --help)" ;;
+  esac
+  shift
+done
 
 # --- prerequisites ---------------------------------------------------------
 command -v yq >/dev/null 2>&1 || \
@@ -64,41 +86,63 @@ for_each_link() {
 
 install_one() {
   local link="$1" entry="$2" target="$3"
-  mkdir -p "$target"
-  if [ -L "$link" ]; then
-    [ "$(readlink "$link")" = "$entry" ] && return 0   # already correct — idempotent
-    err "collision: $link is a symlink pointing elsewhere ($(readlink "$link"))"
-  elif [ -e "$link" ]; then
-    err "collision: $link exists and is not managed by this installer"
+  [ "$DRY_RUN" -eq 1 ] || mkdir -p "$target"
+
+  if [ -L "$link" ] && [ "$(readlink "$link")" = "$entry" ]; then
+    vlog "skip (already linked): $link"
+    return 0
   fi
-  ln -s "$entry" "$link"
-  log "linked: $link -> $entry"
+
+  if [ -L "$link" ] || [ -e "$link" ]; then
+    # something is in the way
+    if [ "$FORCE" -ne 1 ]; then
+      err "collision: $link exists and is not our link — use --force to replace"
+    fi
+    if [ "$DRY_RUN" -eq 1 ]; then
+      log "would replace: $link -> $entry"; n_changed=$((n_changed + 1)); return 0
+    fi
+    rm -rf "$link"
+  fi
+
+  if [ "$DRY_RUN" -eq 1 ]; then
+    log "would link: $link -> $entry"
+  else
+    ln -s "$entry" "$link"
+    log "linked: $link -> $entry"
+  fi
   n_changed=$((n_changed + 1))
 }
 
-# Remove a link only if it is OUR symlink (points at the corpus entry); never touch
-# real files, missing entries, or symlinks pointing elsewhere.
+# Remove a link only if it is OUR symlink (points at the corpus entry).
 uninstall_one() {
   local link="$1" entry="$2"
   if [ -L "$link" ] && [ "$(readlink "$link")" = "$entry" ]; then
-    rm "$link"
-    log "unlinked: $link"
+    if [ "$DRY_RUN" -eq 1 ]; then
+      log "would unlink: $link"
+    else
+      rm "$link"; log "unlinked: $link"
+    fi
     n_changed=$((n_changed + 1))
+  else
+    vlog "skip (not our link): $link"
   fi
 }
 
 # --- main ------------------------------------------------------------------
-mode="install"
-case "${1:-}" in
-  --uninstall) mode="uninstall" ;;
-  "")          ;;
-  *)           err "unknown argument: $1 (supported: --uninstall)" ;;
-esac
+if [ "$DRY_RUN" -eq 1 ]; then log "(dry-run — no changes will be made)"; fi
 
 if [ "$mode" = "install" ]; then
   for_each_link install_one
-  log "install complete ($n_changed new link(s))"
+  if [ "$DRY_RUN" -eq 1 ]; then
+    log "install dry-run complete ($n_changed link(s) would change)"
+  else
+    log "install complete ($n_changed new link(s))"
+  fi
 else
   for_each_link uninstall_one
-  log "uninstall complete ($n_changed link(s) removed)"
+  if [ "$DRY_RUN" -eq 1 ]; then
+    log "uninstall dry-run complete ($n_changed link(s) would be removed)"
+  else
+    log "uninstall complete ($n_changed link(s) removed)"
+  fi
 fi

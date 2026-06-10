@@ -79,3 +79,32 @@ EOF
   [ "$status" -ne 0 ]
   [[ "$output" == *"unknown argument"* ]]
 }
+
+@test "--dry-run makes no filesystem changes" {
+  run bash "$INSTALL" --dry-run
+  [ "$status" -eq 0 ]
+  [ ! -e "$TMP/editor/skills/alpha" ]
+  [[ "$output" == *"would link"* ]]
+}
+
+@test "--force replaces a conflicting non-managed target" {
+  echo "real" > "$TMP/editor/skills/alpha"
+  run bash "$INSTALL" --force
+  [ "$status" -eq 0 ]
+  [ -L "$TMP/editor/skills/alpha" ]
+  [ "$(readlink "$TMP/editor/skills/alpha")" = "$TMP/corpus/skills/alpha" ]
+}
+
+@test "collision without --force still errors" {
+  echo "real" > "$TMP/editor/skills/alpha"
+  run bash "$INSTALL"
+  [ "$status" -ne 0 ]
+  [[ "$output" == *"--force"* ]]
+}
+
+@test "--verbose reports already-linked skips" {
+  run bash "$INSTALL"; [ "$status" -eq 0 ]
+  run bash "$INSTALL" --verbose
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"skip"* ]]
+}
