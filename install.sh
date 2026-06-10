@@ -4,29 +4,48 @@
 #
 # Reads installer.yaml and symlinks each source's corpus/<kind>/<entry> into the
 # editor target dir named by the mapping. Symlink mode (C-INST-1 GO). Per-item links
-# so multiple sources can populate the same target dir. Idempotent; collision = error
-# (unless --force).
+# so multiple sources can populate the same target dir. Idempotent.
 #
-#   install.sh [--uninstall] [--dry-run] [--force] [--verbose]
+# Additive by default (feature ADR-002): ~/.cursor/ is always a managed/shared space, so
+# a foreign target is never clobbered. On collision the installer compares contents —
+# identical => skip silently; differs => skip and warn — then keeps going. --force
+# replaces; --strict errors on a divergent collision.
+#
+#   install.sh [--uninstall] [--dry-run] [--force] [--strict] [--verbose]
 #
 #     --uninstall   remove installer-created symlinks (corpus untouched)
 #     --dry-run     print actions without changing the filesystem
-#     --force       replace a conflicting target (real file / foreign symlink)
+#     --force       replace a conflicting target (real file / foreign symlink) — destructive
+#     --strict      error on a divergent collision instead of skipping
 #     --verbose     report skipped/unchanged entries too
 #
 # Config lookup: $AGENTIC_OCEAN_CONFIG, else $XDG_CONFIG_HOME/agentic-ocean/installer.yaml,
 # else ~/.config/agentic-ocean/installer.yaml.
 #
-# Schema: docs/installer-schema.md. (Scope: Group 4 / Tasks 11–13. The core→personal
-# check arrives in Task 14.)
+# Schema: docs/installer-schema.md.
 
 set -euo pipefail
 
 err()  { printf 'error: %s\n' "$*" >&2; exit 1; }
+warn() { printf 'warning: %s\n' "$*" >&2; }
 log()  { printf '%s\n' "$*"; }
 vlog() { if [ "$VERBOSE" -eq 1 ]; then printf '%s\n' "$*"; fi; }
 
-usage() { sed -n '2,18p' "$0" | sed 's/^# \{0,1\}//'; }
+usage() { sed -n '14,20p' "$0" | sed 's/^# \{0,1\}//'; }
+
+# True when two paths have the same content: files by bytes, dirs recursively.
+# Type mismatch (or anything we can't compare cleanly) => false (treated as divergent,
+# so we skip+warn rather than ever silently assuming equality).
+same_content() {
+  local a="$1" b="$2"
+  if [ -d "$a" ] && [ -d "$b" ]; then
+    diff -r "$a" "$b" >/dev/null 2>&1
+  elif [ -f "$a" ] && [ -f "$b" ]; then
+    cmp -s "$a" "$b"
+  else
+    return 1
+  fi
+}
 
 expand_tilde() {
   case "$1" in
@@ -37,18 +56,20 @@ expand_tilde() {
 }
 
 # --- args ------------------------------------------------------------------
-mode="install"; DRY_RUN=0; FORCE=0; VERBOSE=0
+mode="install"; DRY_RUN=0; FORCE=0; STRICT=0; VERBOSE=0
 while [ $# -gt 0 ]; do
   case "$1" in
     --uninstall)   mode="uninstall" ;;
     --dry-run)     DRY_RUN=1 ;;
     --force)       FORCE=1 ;;
+    --strict)      STRICT=1 ;;
     --verbose|-v)  VERBOSE=1 ;;
     -h|--help)     usage; exit 0 ;;
     *)             err "unknown argument: $1 (see --help)" ;;
   esac
   shift
 done
+[ "$FORCE" -eq 1 ] && [ "$STRICT" -eq 1 ] && err "--force and --strict are mutually exclusive"
 
 # --- prerequisites ---------------------------------------------------------
 command -v yq >/dev/null 2>&1 || \
@@ -60,6 +81,7 @@ config_file="${AGENTIC_OCEAN_CONFIG:-$config_home/agentic-ocean/installer.yaml}"
   err "config not found: $config_file (copy installer.example.yaml there and adjust paths)"
 
 n_changed=0
+n_skipped=0
 
 # Iterate every (link, entry, target) the mapping defines, calling: <handler> link entry target
 for_each_link() {
@@ -94,14 +116,22 @@ install_one() {
   fi
 
   if [ -L "$link" ] || [ -e "$link" ]; then
-    # something is in the way
-    if [ "$FORCE" -ne 1 ]; then
-      err "collision: $link exists and is not our link — use --force to replace"
+    # A foreign target is in the way. Additive default (ADR-002): never clobber.
+    if [ "$FORCE" -eq 1 ]; then
+      if [ "$DRY_RUN" -eq 1 ]; then
+        log "would replace: $link -> $entry"; n_changed=$((n_changed + 1)); return 0
+      fi
+      rm -rf "$link"
+      # fall through to create the link
+    elif same_content "$link" "$entry"; then
+      vlog "skip (identical): $link"
+      n_skipped=$((n_skipped + 1)); return 0
+    elif [ "$STRICT" -eq 1 ]; then
+      err "collision: $link differs from corpus entry (--strict) — resolve it or drop --strict"
+    else
+      warn "skip (differs, kept existing): $link — use --force to replace with the corpus version"
+      n_skipped=$((n_skipped + 1)); return 0
     fi
-    if [ "$DRY_RUN" -eq 1 ]; then
-      log "would replace: $link -> $entry"; n_changed=$((n_changed + 1)); return 0
-    fi
-    rm -rf "$link"
   fi
 
   if [ "$DRY_RUN" -eq 1 ]; then
@@ -134,9 +164,9 @@ if [ "$DRY_RUN" -eq 1 ]; then log "(dry-run — no changes will be made)"; fi
 if [ "$mode" = "install" ]; then
   for_each_link install_one
   if [ "$DRY_RUN" -eq 1 ]; then
-    log "install dry-run complete ($n_changed link(s) would change)"
+    log "install dry-run complete ($n_changed link(s) would change, $n_skipped skipped)"
   else
-    log "install complete ($n_changed new link(s))"
+    log "install complete ($n_changed new link(s), $n_skipped skipped)"
   fi
 else
   for_each_link uninstall_one

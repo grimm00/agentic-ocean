@@ -38,11 +38,44 @@ EOF
   [ -L "$TMP/editor/skills/alpha" ]
 }
 
-@test "collision errors when target exists as a non-managed file" {
+@test "divergent target is skipped with a warning (additive default)" {
+  echo "real" > "$TMP/editor/skills/alpha"   # differs from corpus (a dir)
+  run bash "$INSTALL"
+  [ "$status" -eq 0 ]                          # never aborts
+  [[ "$output" == *"differs"* ]]               # warns
+  [ ! -L "$TMP/editor/skills/alpha" ]          # left alone (not clobbered)
+  [ "$(cat "$TMP/editor/skills/alpha")" = "real" ]
+}
+
+@test "divergent skip still links the other entries" {
   echo "real" > "$TMP/editor/skills/alpha"
   run bash "$INSTALL"
+  [ "$status" -eq 0 ]
+  [ -L "$TMP/editor/skills/beta" ]             # unrelated entry still installed
+  [ -L "$TMP/editor/commands/foo.md" ]
+}
+
+@test "identical target is skipped silently (no warning)" {
+  echo "cmd" > "$TMP/editor/commands/foo.md"   # byte-identical to corpus entry
+  run bash "$INSTALL"
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"differs"* ]]               # no noise for an identical entry
+  [ ! -L "$TMP/editor/commands/foo.md" ]        # left as the existing real file
+  [ "$(cat "$TMP/editor/commands/foo.md")" = "cmd" ]
+  [ -L "$TMP/editor/skills/alpha" ]            # the rest still linked
+}
+
+@test "--strict errors on a divergent collision" {
+  echo "real" > "$TMP/editor/skills/alpha"
+  run bash "$INSTALL" --strict
   [ "$status" -ne 0 ]
-  [[ "$output" == *"collision"* ]]
+  [[ "$output" == *"differs"* ]]
+}
+
+@test "--strict tolerates an identical target (not a real conflict)" {
+  echo "cmd" > "$TMP/editor/commands/foo.md"
+  run bash "$INSTALL" --strict
+  [ "$status" -eq 0 ]
 }
 
 @test "missing config errors clearly" {
@@ -95,10 +128,10 @@ EOF
   [ "$(readlink "$TMP/editor/skills/alpha")" = "$TMP/corpus/skills/alpha" ]
 }
 
-@test "collision without --force still errors" {
+@test "divergent warning points at --force" {
   echo "real" > "$TMP/editor/skills/alpha"
   run bash "$INSTALL"
-  [ "$status" -ne 0 ]
+  [ "$status" -eq 0 ]
   [[ "$output" == *"--force"* ]]
 }
 

@@ -43,10 +43,13 @@ sources:
   multiple sources populate the same `~/.cursor/skills/` side by side.
 - **Multi-source merge.** All sources linking into the same target dir is expected
   (core + personal both → `~/.cursor/skills/`).
-- **Collision = error.** If two sources expose the same entry name into the same target,
-  the installer **errors** rather than clobbering. (The ADR-001 core/personal boundary
-  should prevent name clashes; surfacing a collision flags a real problem — e.g. an
-  accidental core→personal duplication.)
+- **Collision = additive, never clobber** (feature ADR-002). `~/.cursor/` is always a
+  managed/shared space, so a target that the installer didn't create is never overwritten.
+  On collision it compares contents: **identical → skip silently**; **differs → skip and
+  warn**, then continue. `--force` replaces (destructive — unsafe against a managed/team
+  config); `--strict` errors on a divergent collision. The same rule covers two sources
+  exposing the same entry name into one target — a *divergent* clash there flags a real
+  problem (e.g. accidental core→personal duplication, which Task 15's lint also guards).
 - **Targets are parameterized.** No editor path is hardcoded in `install.sh`; everything
   comes from this file. Adding an editor (e.g. `~/.claude/skills`) = adding `links`
   entries, not changing the script.
