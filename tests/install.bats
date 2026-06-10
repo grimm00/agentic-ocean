@@ -51,3 +51,31 @@ EOF
   [ "$status" -ne 0 ]
   [[ "$output" == *"config not found"* ]]
 }
+
+@test "uninstall removes installer-created links, corpus intact" {
+  run bash "$INSTALL"; [ "$status" -eq 0 ]
+  run bash "$INSTALL" --uninstall; [ "$status" -eq 0 ]
+  [ ! -e "$TMP/editor/skills/alpha" ]
+  [ ! -e "$TMP/editor/commands/foo.md" ]
+  [ -f "$TMP/corpus/skills/alpha/SKILL.md" ]   # corpus untouched
+}
+
+@test "uninstall leaves unrelated entries untouched" {
+  run bash "$INSTALL"; [ "$status" -eq 0 ]
+  echo "mine" > "$TMP/editor/skills/unrelated"   # a real file we didn't create
+  run bash "$INSTALL" --uninstall; [ "$status" -eq 0 ]
+  [ -f "$TMP/editor/skills/unrelated" ]          # left alone
+  [ ! -e "$TMP/editor/skills/alpha" ]            # ours removed
+}
+
+@test "uninstall is idempotent" {
+  run bash "$INSTALL"; [ "$status" -eq 0 ]
+  run bash "$INSTALL" --uninstall; [ "$status" -eq 0 ]
+  run bash "$INSTALL" --uninstall; [ "$status" -eq 0 ]
+}
+
+@test "unknown argument errors" {
+  run bash "$INSTALL" --bogus
+  [ "$status" -ne 0 ]
+  [[ "$output" == *"unknown argument"* ]]
+}
