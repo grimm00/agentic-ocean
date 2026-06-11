@@ -147,11 +147,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Run linting
-        run: |
-          echo "Running linting for ${{ needs.detect-branch-type.outputs.branch-type }} branch"
-          # Add your linting commands here
-          # Example: npm run lint, python -m flake8, etc.
+      - name: Install shellcheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+
+      - name: Shellcheck install.sh
+        run: shellcheck install.sh
 
   test:
     runs-on: ubuntu-latest
@@ -162,11 +162,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Run tests
+      - name: Install bats
+        run: sudo apt-get update && sudo apt-get install -y bats
+
+      - name: Install yq (mikefarah v4)
         run: |
-          echo "Running tests for ${{ needs.detect-branch-type.outputs.branch-type }} branch"
-          # Add your testing commands here
-          # Example: npm test, python -m pytest, etc.
+          sudo wget -qO /usr/local/bin/yq \
+            https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+          yq --version
+
+      - name: Run Bats suite
+        run: bats tests/
 
   build:
     runs-on: ubuntu-latest

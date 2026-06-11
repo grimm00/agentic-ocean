@@ -62,6 +62,9 @@ same_content() {
 }
 
 expand_tilde() {
+  # SC2088: the leading ~ here is matched/stripped as a *literal* (we expand it to $HOME
+  # by hand), not a shell tilde-expansion — the warning is a false positive for this case.
+  # shellcheck disable=SC2088
   case "$1" in
     "~")    printf '%s\n' "$HOME" ;;
     "~/"*)  printf '%s\n' "$HOME/${1#\~/}" ;;
