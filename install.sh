@@ -11,12 +11,13 @@
 # identical => skip silently; differs => skip and warn — then keeps going. --force
 # replaces; --strict errors on a divergent collision.
 #
-#   install.sh [--uninstall] [--dry-run] [--force] [--strict] [--verbose]
+#   install.sh [--uninstall] [--dry-run] [--force] [--strict] [--warn-only] [--verbose]
 #
 #     --uninstall   remove installer-created symlinks (corpus untouched)
 #     --dry-run     print actions without changing the filesystem
 #     --force       replace a conflicting target (real file / foreign symlink) — destructive
 #     --strict      error on a divergent collision instead of skipping
+#     --warn-only   downgrade the core→personal check (ADR-001) from error to warning
 #     --verbose     report skipped/unchanged entries too
 #
 # Config lookup: $AGENTIC_OCEAN_CONFIG, else $XDG_CONFIG_HOME/agentic-ocean/installer.yaml,
@@ -35,12 +36,13 @@ vlog() { if [ "$VERBOSE" -eq 1 ]; then printf '%s\n' "$*"; fi; }
 # comment can never desync --help.
 usage() {
   cat <<'EOF'
-install.sh [--uninstall] [--dry-run] [--force] [--strict] [--verbose]
+install.sh [--uninstall] [--dry-run] [--force] [--strict] [--warn-only] [--verbose]
 
   --uninstall   remove installer-created symlinks (corpus untouched)
   --dry-run     print actions without changing the filesystem
   --force       replace a conflicting target (real file / foreign symlink) — destructive
   --strict      error on a divergent collision instead of skipping
+  --warn-only   downgrade the core→personal check (ADR-001) from error to warning
   --verbose     report skipped/unchanged entries too
 EOF
 }
@@ -68,13 +70,14 @@ expand_tilde() {
 }
 
 # --- args ------------------------------------------------------------------
-mode="install"; DRY_RUN=0; FORCE=0; STRICT=0; VERBOSE=0
+mode="install"; DRY_RUN=0; FORCE=0; STRICT=0; VERBOSE=0; WARN_ONLY=0
 while [ $# -gt 0 ]; do
   case "$1" in
     --uninstall)   mode="uninstall" ;;
     --dry-run)     DRY_RUN=1 ;;
     --force)       FORCE=1 ;;
     --strict)      STRICT=1 ;;
+    --warn-only)   WARN_ONLY=1 ;;
     --verbose|-v)  VERBOSE=1 ;;
     -h|--help)     usage; exit 0 ;;
     *)             err "unknown argument: $1 (see --help)" ;;
@@ -94,6 +97,73 @@ config_file="${AGENTIC_OCEAN_CONFIG:-$config_home/agentic-ocean/installer.yaml}"
 
 n_changed=0
 n_skipped=0
+
+# List entry "names" under a corpus root: each immediate <kind>/<entry>, basename with a
+# trailing .md stripped (so 'commands/foo.md' and 'skills/foo' both read as 'foo').
+entry_names() {
+  local root="$1" kinddir entry base
+  for kinddir in "$root"/*/; do
+    [ -d "$kinddir" ] || continue
+    for entry in "$kinddir"*; do
+      [ -e "$entry" ] || continue
+      base="$(basename "$entry")"
+      printf '%s\n' "${base%.md}"
+    done
+  done
+}
+
+# ADR-001 invariant: a CORE artifact must not reference a PERSONAL-only entry (else a
+# core-only clone breaks). Heuristic (documented in docs/installer-schema.md): the set of
+# names present in `role: personal` sources but not in `role: core` sources is grepped
+# (whole-word, fixed-string) across the core corpus files. Name-grep only — not semantic
+# analysis: it can false-positive on a coincidental word and miss references by other names.
+# Runs only when both roles are present; errors by default, warns under --warn-only.
+core_personal_lint() {
+  local n i role root
+  local core_roots=() personal_roots=()
+  n="$(yq '.sources | length' "$config_file")"
+  # Defer malformed/empty 'sources:' to for_each_link's validation — don't index here.
+  case "$n" in '' | *[!0-9]*) return 0 ;; esac
+  [ "$n" -gt 0 ] || return 0
+  for i in $(seq 0 "$((n - 1))"); do
+    role="$(yq ".sources[$i].role" "$config_file")"
+    root="$(expand_tilde "$(yq ".sources[$i].root" "$config_file")")"
+    case "$role" in
+      core)     core_roots+=("$root") ;;
+      personal) personal_roots+=("$root") ;;
+    esac
+  done
+  if [ "${#core_roots[@]}" -eq 0 ] || [ "${#personal_roots[@]}" -eq 0 ]; then
+    vlog "core→personal check: skipped (needs a role: core and a role: personal source)"
+    return 0
+  fi
+
+  local personal_only r pname f
+  personal_only="$(comm -23 \
+    <(for r in "${personal_roots[@]}"; do entry_names "$r"; done | sort -u) \
+    <(for r in "${core_roots[@]}";     do entry_names "$r"; done | sort -u))"
+
+  local offenders=()
+  while IFS= read -r pname; do
+    [ -n "$pname" ] || continue
+    for r in "${core_roots[@]}"; do
+      while IFS= read -r f; do
+        [ -n "$f" ] || continue
+        offenders+=("$f → references personal-only '$pname'")
+      done < <(grep -rIlwF -- "$pname" "$r" 2>/dev/null || true)
+    done
+  done <<EOF
+$personal_only
+EOF
+
+  [ "${#offenders[@]}" -gt 0 ] || { vlog "core→personal check: clean"; return 0; }
+  for r in "${offenders[@]}"; do warn "core→personal: $r"; done
+  if [ "$WARN_ONLY" -eq 1 ]; then
+    warn "core→personal check: ${#offenders[@]} issue(s) (continuing: --warn-only)"
+  else
+    err "core→personal check failed: ${#offenders[@]} reference(s) — fix them, or re-run with --warn-only"
+  fi
+}
 
 # Iterate every (link, entry, target) the mapping defines, calling: <handler> link entry target
 for_each_link() {
@@ -182,6 +252,7 @@ uninstall_one() {
 if [ "$DRY_RUN" -eq 1 ]; then log "(dry-run — no changes will be made)"; fi
 
 if [ "$mode" = "install" ]; then
+  core_personal_lint        # ADR-001 invariant — runs before any linking (read-only)
   for_each_link install_one
   if [ "$DRY_RUN" -eq 1 ]; then
     log "install dry-run complete ($n_changed link(s) would change, $n_skipped skipped)"

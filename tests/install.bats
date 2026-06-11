@@ -179,3 +179,67 @@ EOF
   [[ "$output" == *"sources"* ]]
   [[ "$output" != *"integer expression expected"* ]]
 }
+
+# --- core->personal reference check (ADR-001 invariant) --------------------
+
+# Writes a two-source, role-tagged config (core + personal) into $CONFIG.
+roled_config() {
+  mkdir -p "$TMP/personal/skills/pskill"
+  echo "p" > "$TMP/personal/skills/pskill/SKILL.md"
+  cat > "$CONFIG" <<EOF
+schema_version: 1
+sources:
+  - name: core
+    role: core
+    root: $TMP/corpus
+    links:
+      skills: $TMP/editor/skills
+  - name: personal
+    role: personal
+    root: $TMP/personal
+    links:
+      skills: $TMP/editor/skills
+EOF
+}
+
+@test "core->personal reference fails the install and names the offender" {
+  roled_config
+  echo "delegates to pskill for the heavy lifting" > "$TMP/corpus/skills/alpha/SKILL.md"
+  run bash "$INSTALL"
+  [ "$status" -ne 0 ]
+  [[ "$output" == *"pskill"* ]]       # names the personal-only entry
+  [[ "$output" == *"alpha"* ]]        # names the offending core file
+  [ ! -L "$TMP/editor/skills/alpha" ] # lint runs before linking — nothing installed
+}
+
+@test "clean corpora pass the core->personal check" {
+  roled_config                         # core/alpha keeps its default "alpha" content (no pskill ref)
+  run bash "$INSTALL"
+  [ "$status" -eq 0 ]
+  [ -L "$TMP/editor/skills/alpha" ]
+  [ -L "$TMP/editor/skills/beta" ]
+}
+
+@test "--warn-only downgrades a core->personal reference to a warning" {
+  roled_config
+  echo "see pskill" > "$TMP/corpus/skills/alpha/SKILL.md"
+  run bash "$INSTALL" --warn-only
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"pskill"* ]]
+  [ -L "$TMP/editor/skills/alpha" ]    # proceeded with linking
+}
+
+@test "core->personal check is skipped without role markers (back-compat)" {
+  # default $CONFIG from setup() has a single un-roled source
+  echo "mentions apprentice-eod, a name not in this corpus" > "$TMP/corpus/skills/alpha/SKILL.md"
+  run bash "$INSTALL"
+  [ "$status" -eq 0 ]                  # no roles => no lint => normal install
+  [ -L "$TMP/editor/skills/alpha" ]
+}
+
+@test "word-boundary: a substring match does not trip the check" {
+  roled_config
+  echo "this mentions pskillful which is unrelated" > "$TMP/corpus/skills/alpha/SKILL.md"
+  run bash "$INSTALL"
+  [ "$status" -eq 0 ]                  # 'pskillful' != 'pskill' (word boundary)
+}
