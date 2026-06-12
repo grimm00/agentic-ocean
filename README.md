@@ -43,8 +43,20 @@ cp installer.example.yaml ~/.config/agentic-ocean/installer.yaml   # then adjust
 
 `--dry-run` previews, `--force` replaces a conflict (destructive), `--strict` errors on one,
 `--warn-only` softens the core→personal check. Requires [`yq`](https://github.com/mikefarah/yq);
-see `docs/installer-schema.md`. The full clone→install multi-machine flow (core + personal
-together) lands in Group 5.
+see `docs/installer-schema.md`.
+
+### Fresh machine (one command)
+
+`bootstrap.sh` clones the private personal repo as a sibling, seeds the config from
+`installer.example.yaml` (rewriting corpus roots to the local clones), and runs `install.sh`:
+
+```bash
+git clone https://github.com/grimm00/agentic-ocean.git
+cd agentic-ocean && ./bootstrap.sh        # add --core-only to skip the private personal repo
+```
+
+Idempotent and add-only; an existing `~/.config/agentic-ocean/installer.yaml` is left untouched.
+The personal repo needs SSH/`gh` auth (`--core-only` otherwise). Requires `git` + `yq`.
 
 ## Testing
 
