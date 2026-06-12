@@ -11,6 +11,7 @@ schema_version: 1
 sources:
   # Core corpus (this repo, public)
   - name: agentic-ocean
+    role: core            # role: core|personal drives the ADR-001 core→personal check
     root: ~/Projects/agentic-ocean/corpus
     links:
       skills: ~/.cursor/skills
@@ -19,6 +20,7 @@ sources:
 
   # Personal corpus (private sibling)
   - name: agentic-ocean-personal
+    role: personal
     root: ~/Projects/agentic-ocean-personal/corpus
     links:
       skills: ~/.cursor/skills
