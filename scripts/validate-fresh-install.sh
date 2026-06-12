@@ -15,7 +15,8 @@
 #
 #   scripts/validate-fresh-install.sh [--image IMG] [--keep]
 #
-#     --image IMG   base image (default: ubuntu:latest)
+#     --image IMG   base image (default: ubuntu:latest) — must be Debian/Ubuntu-based
+#                   (the harness installs tooling via apt-get/dpkg)
 #     --keep        keep the scratch bundle dir (default: cleaned up)
 #
 # Env: AGENTIC_OCEAN_PERSONAL_REPO (default: ~/Projects/agentic-ocean-personal).
@@ -36,6 +37,7 @@ while [ $# -gt 0 ]; do
 done
 
 command -v docker >/dev/null 2>&1 || err "docker is required"
+command -v git    >/dev/null 2>&1 || err "git is required (used to bundle the repos)"
 docker version >/dev/null 2>&1 || err "docker daemon not reachable"
 
 core_repo="$(cd "$(dirname "$0")/.." && pwd)"
@@ -57,8 +59,17 @@ export DEBIAN_FRONTEND=noninteractive
 echo "--- installing tooling (git + yq) ---"
 apt-get update -qq >/dev/null
 apt-get install -yqq git wget ca-certificates >/dev/null
+# Map dpkg arch names → yq release asset names (they differ for 32-bit/x86);
+# fail fast on anything we don't know rather than 404 on wget.
 ARCH="$(dpkg --print-architecture)"
-wget -qO /usr/local/bin/yq "https://github.com/mikefarah/yq/releases/latest/download/yq_linux_${ARCH}"
+case "$ARCH" in
+  amd64) YQ_ARCH=amd64 ;;
+  arm64) YQ_ARCH=arm64 ;;
+  armhf) YQ_ARCH=arm ;;
+  i386)  YQ_ARCH=386 ;;
+  *) echo "FAIL: unsupported container arch '$ARCH' (no known yq asset)"; exit 1 ;;
+esac
+wget -qO /usr/local/bin/yq "https://github.com/mikefarah/yq/releases/latest/download/yq_linux_${YQ_ARCH}"
 chmod +x /usr/local/bin/yq
 echo "git $(git --version | awk '{print $3}'), $(yq --version)"
 
