@@ -183,11 +183,21 @@ for_each_link() {
     name="$(yq ".sources[$i].name" "$config_file")"
     root="$(expand_tilde "$(yq ".sources[$i].root" "$config_file")")"
     [ -d "$root" ] || err "source '$name': root not found: $root"
+    # A source must carry a 'links:' map; without it 'keys' would error and the
+    # source would silently contribute nothing.
+    if [ "$(yq ".sources[$i].links | type" "$config_file" 2>/dev/null)" != "!!map" ]; then
+      warn "source '$name': no 'links:' map — skipping"
+      continue
+    fi
     # Process substitution (not a pipe) so the loop runs in this shell and the
     # n_changed/n_skipped increments inside the handler survive.
     while IFS= read -r kind; do
       [ -n "$kind" ] || continue
       target="$(expand_tilde "$(yq ".sources[$i].links.$kind" "$config_file")")"
+      if [ -z "$target" ] || [ "$target" = "null" ]; then
+        warn "source '$name': links.$kind has no target — skipping"
+        continue
+      fi
       srcdir="$root/$kind"
       [ -d "$srcdir" ] || continue
       for entry in "$srcdir"/*; do

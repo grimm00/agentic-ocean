@@ -243,3 +243,33 @@ EOF
   run bash "$INSTALL"
   [ "$status" -eq 0 ]                  # 'pskillful' != 'pskill' (word boundary)
 }
+
+# --- malformed-config robustness (Sourcery PR #2) --------------------------
+
+@test "source missing a links block is skipped with a warning (no raw yq error)" {
+  cat > "$CONFIG" <<EOF
+schema_version: 1
+sources:
+  - name: nolinks
+    root: $TMP/corpus
+EOF
+  run bash "$INSTALL"
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"cannot get keys"* ]]   # the raw yq error must not leak
+  [[ "$output" == *"links"* ]]             # we explain the skip
+}
+
+@test "a links entry with no target is skipped, not turned into a bogus path" {
+  cat > "$CONFIG" <<EOF
+schema_version: 1
+sources:
+  - name: notarget
+    root: $TMP/corpus
+    links:
+      skills:
+EOF
+  run bash "$INSTALL"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"target"* ]]            # warns about the missing target
+  [[ "$output" != *"linked:"* ]]           # nothing linked into a bogus ("/<entry>") path
+}
