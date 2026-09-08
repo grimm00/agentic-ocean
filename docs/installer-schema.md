@@ -22,6 +22,8 @@ sources:
       skills: <editor-target-dir>
       commands: <editor-target-dir>
       agents: <editor-target-dir>
+      principles: <editor-target-dir>   # optional; attention norms
+      registers: <editor-target-dir>    # optional; audience/voice modules
   - name: ...                    # additional sources (e.g. the personal repo)
 ```
 
@@ -32,7 +34,7 @@ sources:
 | `sources[].name` | Label (for logs / collision messages). |
 | `sources[].role` | Optional; `core` or `personal`. Drives the ADR-001 core→personal check (see below). Omit it and the check is skipped. |
 | `sources[].root` | The repo's **`corpus/`** payload root (not the repo root — repo root holds non-installable scaffolding). |
-| `sources[].links.<kind>` | Maps a payload kind (`skills` / `commands` / `agents`) to the editor target dir it installs into. |
+| `sources[].links.<kind>` | Maps a payload kind (`skills` / `commands` / `agents` / `principles` / `registers`) to the editor target dir it installs into. |
 
 ---
 

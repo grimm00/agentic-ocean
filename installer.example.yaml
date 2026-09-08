@@ -17,6 +17,8 @@ sources:
       skills: ~/.cursor/skills
       commands: ~/.cursor/commands
       agents: ~/.cursor/agents
+      principles: ~/.cursor/principles
+      registers: ~/.cursor/registers
 
   # Personal corpus (private sibling)
   - name: agentic-ocean-personal
@@ -26,3 +28,5 @@ sources:
       skills: ~/.cursor/skills
       commands: ~/.cursor/commands
       agents: ~/.cursor/agents
+      principles: ~/.cursor/principles
+      registers: ~/.cursor/registers

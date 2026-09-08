@@ -19,6 +19,8 @@ All installable content lives under **`corpus/`** (separated from repo scaffoldi
 | `corpus/skills/` | 14 core skills (`commit`, `decision`, `discuss`, `explore`, `handoff`, `int-opp`, `narrative`, `plan-review`, `pre-commit-review`, `reflect`, `research`, `spike`, `update-pr-description`, `write-plan`) |
 | `corpus/commands/` | 20 core commands (workflow: `agent-dispatch`, `task`, `pr-validation`, `post-pr`, `release-*`, `fix-*`, …) |
 | `corpus/agents/` | `group-cycle.agent.md`, `research-orchestrator/` |
+| `corpus/principles/` | Loadable norms (e.g. `documentation-is-ownership`) — equipped by skills/agents at runtime |
+| `corpus/registers/` | Audience/voice modules (e.g. `cold-reader-operator`) — equipped when writing that audience’s prose |
 | `install.sh` | Symlink-farm installer (additive, reversible). Maps from `corpus/` per `~/.config/agentic-ocean/installer.yaml`. |
 
 ## Core vs personal
@@ -33,7 +35,7 @@ This is the **core** half of a two-repo split ([dev-infra ADR-001](https://githu
 
 Per dev-infra ADR-002, skills install via a **symlink farm**: `install.sh` reads a mapping
 from `~/.config/agentic-ocean/installer.yaml` and symlinks editor paths (`~/.cursor/skills/`,
-…) into this repo's `corpus/`.
+`~/.cursor/principles/`, `~/.cursor/registers/`, …) into this repo's `corpus/`.
 
 ```bash
 cp installer.example.yaml ~/.config/agentic-ocean/installer.yaml   # then adjust paths per machine
