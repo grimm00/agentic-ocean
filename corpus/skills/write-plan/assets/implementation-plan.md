@@ -43,10 +43,12 @@ tasks_files:
 - [ ] Task 1: [Task title]
 - [ ] Task 2: [Task title]
 - [ ] Task 3: [Task title]
+- [ ] **Docs:** [update/split durable docs for this group — or “no durable doc change”]
 
 ### [Group 2 Name]
 - [ ] Task 4: [Task title]
 - [ ] Task 5: [Task title]
+- [ ] **Docs:** [update/split durable docs — WIP marker OK until path closes]
 
 ---
 
@@ -54,7 +56,8 @@ tasks_files:
 
 - [ ] All tasks complete
 - [ ] CI/CD passing
-- [ ] Documentation updated
+- [ ] **Docs ownership:** durable docs updated and/or split per group; WIP markers cleared or explicitly deferred (see `~/.cursor/principles/documentation-is-ownership.md`)
+- [ ] Code comments stay thin (hazards / pointers only — narrative in docs/PRs)
 - [ ] Templates synced
 
 ---

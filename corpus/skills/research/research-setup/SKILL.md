@@ -83,6 +83,8 @@ For **each** topic, add one markdown file:
   Methodology (placeholder), Sources checklist (include a line that web search
   is expected **in conduct**), empty Findings / Analysis / Recommendations /
   Requirements Discovered / Next Steps.
+- In **Findings**, leave a one-line pointer (do not invent findings):
+  `*(Conduct: claim heading, Kind, Source, Evidence, Relevance — see research-conduct/findings-format.md.)*`
 
 Use the project’s established section headings so **research-conduct** can
 fill them without reformatting.

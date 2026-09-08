@@ -5,7 +5,7 @@ description: >-
   /explore [topic] (without --amend) and wants to organize raw thoughts, ideas,
   or a brain dump into a self-sufficient exploration with prioritized research
   questions. Do NOT use for appending to an existing exploration (/explore-amend)
-  or for implementing planned work (/task).
+  or for implementing planned work (/implement).
 disable-model-invocation: true
 ---
 

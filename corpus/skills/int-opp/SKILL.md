@@ -17,8 +17,14 @@ projects. The goal is actionable documentation, not retrospective prose.
 ```
 identify project → detect/create opportunity directory
   → determine type (learning or improvement)
-  → create document from template → fill with specifics → commit → stop
+  → create document from template → fill with specifics
+  → persist (commit if tracked; leave `.scratch` local) → stop
 ```
+
+## Related pipeline
+
+After **implement** / post-PR, capture while fresh. Not a substitute for
+**write-plan-amend** or plan checkboxes.
 
 ## Templates
 
@@ -58,8 +64,12 @@ directory.
 
 | Structure | Opportunities path |
 |-----------|-------------------|
-| Dev-infra | `admin/planning/opportunities/internal/[project]/` |
+| Scratch / warm planning repo (e.g. CatdogServices) | `.scratch/opportunities/internal/[project]/` (gitignored — do not commit) |
+| Dev-infra (tracked admin tree) | `admin/planning/opportunities/internal/[project]/` |
 | Template project | `docs/maintainers/opportunities/[project]/` |
+
+Prefer `.scratch/…` when the repo already uses `.scratch/` for plan-reviews and
+local churn. Do **not** invent an `admin/` directory in scratch-only repos.
 
 ### 2. Create project directory (if `--new-project` or project doesn't exist)
 
@@ -103,10 +113,12 @@ with specifics from the user's input and project context.
 Add the new document to the project's learnings or improvements hub README.
 Update the main opportunities hub if this is a new project.
 
-### 6. Commit and stop
+### 6. Persist and stop
 
-Commit with `docs(int-opp): capture [project] learnings — [topic]`.
-Docs-only — can push directly to current branch.
+- **Tracked paths** (dev-infra `admin/…`, template `docs/maintainers/…`): commit
+  with `docs(int-opp): capture [project] learnings — [topic]`. Docs-only — can
+  push directly to current branch.
+- **`.scratch/…`**: leave local only (gitignored). Do not force-add or commit.
 
 ## Behavioral Contract
 

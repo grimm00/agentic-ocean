@@ -10,18 +10,16 @@ disable-model-invocation: true
 
 # Plan Review
 
-Ensure **uniform planning trees** are internally consistent before `/task` style
+Ensure **uniform planning trees** are internally consistent before **`implement`**
 execution. Replaces `.cursor/commands/plan-review.md` with the same behavioral
 contract plus **`planning-stage{N}/`** parity with **`write-plan`**.
 
 **Formal absorption of `/pre-phase-review`:** Operator + agent pipelines now standardize
 on **plan-review** for the “checkpoint before the next tranche of work” role. Use this
 skill **between** dispatched task groups (after the prior group’s work has landed, before
-plan expansion / execution of the next group) so blockers surface early. The dated
-**`plan-review-YYYY-MM-DD.md`** artifact is identical whether run standalone or as a
-pipeline gate — see **`references/structure.yaml`** (`pipeline_integration`). Legacy
-**`/pre-phase-review`** stubs remain only as thin redirects to **`/plan-review`** /
-this skill.
+amend / execution of the next group) so blockers surface early. Prefer amending the
+group file with readiness notes when the operator does not want a separate dated
+artifact — dated **`plan-review-YYYY-MM-DD.md`** under `.scratch/` remains optional.
 
 Heavy checklist prose lives in **`assets/review-checklist.md`** — copy into the dated
 review artifact named in **`references/structure.yaml`** (`report_output`).
@@ -35,13 +33,13 @@ review artifact named in **`references/structure.yaml`** (`report_output`).
   group merges or fully lands, before you expand/execute the next group) — same dated
   artifact output as any other invocation; scope with `--group N` when you only need
   the upcoming group’s footprint reviewed.
-- After **`write-plan-setup`** / **`write-plan-expand`** produced or mutated files.
+- After **`write-plan-start`** / **`write-plan-amend`** produced or mutated files.
 - User invokes `/plan-review`, names this skill, or supplies `--check-deps` /
   `--check-tests` emphasis flags.
 
 ## When not to use
 
-- Planning tree absent → run **`write-plan-setup`** first.
+- Planning tree absent → run **`write-plan-start`** first.
 - Legacy-only phase markdown (`phase-*.md` without uniform frontmatter) → migrate per
   **`docs/MIGRATION-v0.10.md`** instead of forcing this checklist.
 
@@ -67,6 +65,9 @@ If several `planning-stage*` dirs exist, **STOP** after listing candidates unles
 1. **`implementation-plan.md`** readable at chosen root.
 2. **`tasks/`** directory exists (may be scaffolding).
 3. Feature scope explicit (`--feature`) **when** multiple planning trees match repo detection.
+4. **`read ~/.cursor/principles/documentation-is-ownership.md`** before scoring DoD /
+   docs completeness (blocker if groups that change lived truth lack Docs steps
+   and lack an explicit “no durable doc change” / WIP note).
 
 ---
 
@@ -152,10 +153,10 @@ Classify findings:
 
 ## Related
 
-- **`write-plan`** family — upstream scaffolding producer (`write-plan-setup`, `write-plan-expand`).
+- **`write-plan`** family — **write-plan-start** / **write-plan-amend**.
+- **`implement`** — execute Ready tasks (no auto-commit).
 - **`decision`** — precedes planning when ADRs justify transition planning.
 - `.cursor/commands/pre-phase-review.md` — deprecated redirect shim → use this skill instead.
-- Retired `/plan-review` command text (read-only history): `admin/archived/commands/stage3-planner/` — **not** an execution prerequisite.
 
 ---
 

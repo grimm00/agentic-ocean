@@ -1,81 +1,90 @@
 ---
 name: write-plan
 description: >-
-  Write-plan skill family parent. Orientation and shared conventions for scaffolding
-  and expanding implementation plans. Do NOT invoke directly — use write-plan-setup
-  (scaffold planning tree) or write-plan-expand (deepen one group file). Children
-  should read this file first for path rules and contracts.
+  Write-plan skill family parent. Orientation for creating a self-sufficient
+  implementation plan or amending an existing one. Do NOT invoke directly —
+  use write-plan-start (new plan) or write-plan-amend (mutations). Children
+  read this file first for path rules and contracts.
 disable-model-invocation: true
 ---
 
 # Write-Plan — Skill Family
 
-Create or evolve **uniform planning trees** (`implementation-plan.md`,
-`status-and-next-steps.md`, `tasks/`) sourced from ADRs, artifacts, reflections,
-or design docs. Mirrors the retired `/transition-plan` command as two focused
-skills so each invocation carries less procedural surface area.
+Produce or evolve **uniform planning trees** (`implementation-plan.md`,
+`status-and-next-steps.md`, `tasks/`) from ADRs, requirements, artifacts, or
+design docs.
+
+Plans are **self-sufficient** at the planning level of abstraction: enough
+context to run **implement** without a mandatory skeleton→expand ceremony.
+Full seven-field task cadence is optional depth via **amend**, not a gate.
 
 ```
-write-plan-setup → (human review of scaffolding) → write-plan-expand → (repeat expand) → execution workflow
+write-plan-start → (human review) → implement
+        ↑
+write-plan-amend (add/deepen/fix plan docs — never silent rescaffold)
 ```
+
+**Removed:** `write-plan-setup` (skeleton-only) and mandatory `write-plan-expand`.
+Do not recreate setup mode. Legacy `/transition-plan` without flags →
+**write-plan-start**. Legacy `--expand` → **write-plan-amend** with deepen intent.
 
 ## Available Skills
 
 | Skill | When to use |
 |-------|-------------|
-| **write-plan-setup** | **Setup mode:** scaffold `implementation-plan.md`, `status-and-next-steps.md`, and skeletized `tasks/NN-group.md` files |
-| **write-plan-expand** | **Expand mode:** turn one scaffolding group file into detailed steps / acceptance criteria |
+| **write-plan-start** | New planning tree (or new `planning-stageN/`) with usable group context |
+| **write-plan-amend** | Append a group, deepen tasks, fix DoD/status, FR-driven readiness notes |
 
 ## Family Conventions
 
-Child skills live in `write-plan-setup/` and `write-plan-expand/`. Before running a
-workflow, **`read ../SKILL.md`** in that child loads this orientation (path detection,
-templates location, parity rules).
+### Principles (hard-require)
+
+Before DoD or Acceptance prose, **`read ~/.cursor/principles/documentation-is-ownership.md`**.
+For Docs / Mixed operator prose, **`read ~/.cursor/registers/cold-reader-operator.md`**.
 
 ### Path Detection
 
-Pick **one** planning root and use it for the whole subtree:
-
 | Layout | Planning root |
 |--------|----------------|
-| Dev-infra feature | `admin/services/[service]/features/[feature]/` + **`planning/`** or **`planning-stage{N}/`** |
+| Dev-infra | `admin/services/[service]/features/[feature]/` + `planning/` or `planning-stage{N}/` |
+| CatdogServices / scratch feature | `{project}/{feature}/planning/` or `planning-stage{N}/` |
 | Template maintainer | `docs/maintainers/planning/features/[feature]/` |
 
-**Staged planning:** If the feature already uses `planning-stage2/`, `planning-stage3/`, etc., create **sibling** directories — do not silently merge into an old stage without user confirmation.
+Staged siblings (`planning-stage2/`, …): create a **new** stage directory when
+starting a stage — do not overwrite a prior stage without confirmation.
 
-**Detection:** If `admin/services/` applies in the repo, prefer the dev-infra layout row. Otherwise use the maintainer-docs row. Record the chosen subdirectory in `status-and-next-steps.md` Notes.
+### Plan sufficiency (start bar)
 
-Details and `{N}` semantics: `references/structure.yaml` (`planning_roots`).
+A group file from **start** must be enough for `/implement` when requirements
+are Final:
 
-### Shared Preconditions
+- Clear tasks with FR/C IDs or authority links
+- In/Out dependencies
+- Gotchas that prevent lived failure (merge cloud-init, fail-closed vars, …)
+- Docs checkbox when lived truth changes
 
-1. **Topic / feature name** is known or inferable.
-2. **Input mode** is identified (`from_adr` | `from_artifacts` | `from_reflection` | `from_design`) — see child skills.
-3. Source paths exist and are readable — or the workflow stops with options.
-
-### Templates and Contract
-
-- **Copy, do not reinvent filenames:** templates live in `assets/` beside this file.
-- **Declarative I/O:** `references/structure.yaml` is the authoritative map of Setup vs Expand outputs (`setup_output`, `expand_output`).
-- **Frontmatter parity:** `task_count`, `groups[]`, `tasks_files[]`, and body checkboxes must stay consistent across Setup and Expand (Expand never drops the plan root).
+Seven-field Purpose/Grounding/Relevance/Steps/Files/Acceptance/Gotcha remains
+available via **amend --deepen** for operators who want that cadence — not required
+for Ready.
 
 ### Commit Discipline
 
-Planning artifacts are documentation. Prefer `docs([feature]):` or the host repo’s planner scope; avoid merging unless policy requires it.
+`docs([feature]): …` (or host planner scope). Docs-only may push per repo habit;
+never force-push.
 
 ## When NOT to Use This Family
 
 | Situation | Use instead |
 |-----------|-------------|
-| No agreed source material | Gather ADRs / design first (**decision**, upstream research) |
-| Only code churn, no plan files | Implementation task workflows |
-| Plan already fully expanded | Execute tasks — do not rescaffold |
+| No source material | decision / research / requirements first |
+| Execute a task | **implement** |
+| Validate consistency only | **plan-review** |
 
 ## Related
 
-- **decision** — upstream ADRs.
-- **plan-review** — validate plan consistency before execution.
-- **research / explore** — earlier pipeline stages feeding planning inputs.
+- **implement** — execute tasks (no auto-commit; operator handoff)
+- **plan-review** — readiness before a group
+- **decision / research / explore** — upstream
 
-**Canonical shapes:** `references/structure.yaml`  
-**Templates:** `assets/implementation-plan.md`, `assets/status-and-next-steps.md`, `assets/task-group-skeleton.md`
+**Contract:** `references/structure.yaml`  
+**Templates:** `assets/`

@@ -16,7 +16,7 @@ for decisions. This family replaces the multi-mode `/research` command:
 ```
 research-setup → (human review) → research-conduct → (human review) → research-consolidate → /decision → /transition-plan
          ↑
-    explore output & explore-amend
+    explore output & explore-amend (new topics in research-topics.md)
 ```
 
 ## Available Skills
@@ -75,6 +75,11 @@ special characters. Align with explore family topic naming.
 Exact line targets live in **research-setup** (scaffolding) and
 **research-conduct** (filled artifacts).
 
+**Finding shape:** Conduct fills each finding as a dated **claim** with **Kind**,
+**Source**, **Evidence**, and **Relevance**. See
+`research-conduct/SKILL.md` and `research-conduct/findings-format.md`. Do not
+treat vendor docs as durable truth; do not explain the evidence with the evidence.
+
 ### Commit Discipline
 
 Research artifacts are documentation. Use `docs(research):` commit scope unless
@@ -102,4 +107,3 @@ research directory until a future naming cleanup.
 - **Upstream:** explore → `research-topics.md`
 - **Downstream:** `/decision --from-research`, `/transition-plan --from-adr`
 - **Lateral:** **explore** family for exploration paths and amend loop
-- **Orchestration:** `~/.cursor/agents/research-orchestrator/` — agent that runs all incomplete topics in one pass (extracted from this skill family; orchestration is an agent concern, not a skill concern)

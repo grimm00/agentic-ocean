@@ -14,7 +14,7 @@ Organize unstructured thoughts into themed explorations with prioritized
 research questions. This is the entry point of the thinking pipeline:
 
 ```
-explore-start → (human review) → research → decision → transition-plan → task
+explore-start → (human review) → research → decision → write-plan → implement
                       ↑
           explore-amend (feedback loop from downstream)
 ```
@@ -80,7 +80,7 @@ characters. Example: `"Improve CI Pipeline"` → `improve-ci-pipeline`.
 | Ready to investigate specific questions | `/research` |
 | Ready to make a decision | `/decision` |
 | Capturing a quick internal improvement | `/int-opp` |
-| Implementing planned work | `/task` |
+| Implementing planned work | `/implement` |
 
 ## Related
 

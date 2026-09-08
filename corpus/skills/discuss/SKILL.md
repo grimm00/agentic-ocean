@@ -190,7 +190,7 @@ Use when the user wants to **think without committing**:
 - The user wants to start a new exploration → `/explore`
 - The user is ready to make a decision → `/decision`
 - The user needs research conducted → `/research`
-- The user wants to implement something → `/task`
+- The user wants to implement something → `/implement`
 
 ## Related Skills
 
@@ -198,4 +198,4 @@ Use when the user wants to **think without committing**:
 - `/research` — investigate specific questions (creates artifacts)
 - `/int-opp` — capture an internal improvement opportunity (creates artifacts)
 - `/decision` — record an architectural decision (creates artifacts)
-- `/task` — implement work (creates and modifies files)
+- `/implement` — implement planned work (creates and modifies files; no auto-commit)

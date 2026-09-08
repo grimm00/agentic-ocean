@@ -45,6 +45,7 @@
 - [ ] Plan ↔ Status progress counts align
 - [ ] Plan ↔ Task titles align (no phantom tasks)
 - [ ] Frontmatter `groups[].tasks` matches markdown numbering inside files
+- [ ] **Docs ownership:** `~/.cursor/principles/documentation-is-ownership.md` — every group that changes lived truth has a Docs step (or explicit “no durable doc change” / WIP); stage DoD requires docs path closed
 
 ---
 

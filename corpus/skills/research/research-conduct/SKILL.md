@@ -82,21 +82,32 @@ Place recorded queries in the topic doc (e.g. under **Methodology** as a short
 “**Queries executed**” list, or adjacent to **Findings**) so reviewers can see
 coverage.
 
-**Finding quality:** Each finding MUST include:
+**Finding shape (required):** Follow [findings-format.md](findings-format.md).
+Each finding is a **claim** (heading) plus:
 
-- A heading or title;
-- **Source:** credible link, document name, or “Web search: `<query>`”;
-- **Relevance:** one or two sentences tying the finding to the research
-  question.
+| Field | Rule |
+|-------|------|
+| **Kind** | One of: Vendor-current, This-repo policy, Practitioner pattern, Synthesis |
+| **Source** | Link, repo path, `Web search: <query>`, or dated live inspection |
+| **Evidence** | Facts from those sources — **not** a restatement of the heading |
+| **Relevance** | Why those facts matter *here* (tables, caveats, unverified items). Backup-and-restore density; not a one-liner |
+
+Do **not** explain the evidence with the evidence (circular “X because X”). Label
+vendor docs as **Vendor-current** with an as-of date so they can be superseded.
+If live work was skipped, leave those sources unchecked and say so in Relevance.
+
+Put the Kind table once under Methodology (or a pointer to `findings-format.md`).
 
 ### 3. Fill in the research document
 
 Update the topic file minimally but completely for this pass:
 
-1. **Findings** — additive entries unless the user asked to replace stale text.
-2. **Analysis** — insights that cite which findings support them; use checkbox
-   lists where the template already does.
-3. **Recommendations** — checkbox list aligned to findings.
+1. **Findings** — additive entries unless the user asked to replace stale text;
+   each entry uses the finding shape above.
+2. **Analysis** — insights that cite which findings support them; `[x]` is OK for
+   conclusions of this pass.
+3. **Recommendations** — `[ ]` follow-through actions aligned to findings. Do
+   **not** check boxes because “research recommends this.”
 4. **Requirements Discovered** — checkbox list of candidate reqs; do **not**
    invent formal FR IDs here unless the project template already does — prefer
    carrying them into `requirements.md` with proper IDs in the next step.
@@ -106,7 +117,8 @@ Update the topic file minimally but completely for this pass:
 Set **Status:** `✅ Complete` and **Completed:** `YYYY-MM-DD` only if **all** are
 true:
 
-- Findings section has ≥1 finding with Source + Relevance.
+- Findings section has ≥1 finding with Kind + Source + Evidence + Relevance
+  (Evidence does not merely restate the heading).
 - Analysis and Recommendations are non-empty (or explicitly marked N/A with
   reason if the question is purely factual).
 - Research Goals checklist has all items resolved `[x]` or intentionally
@@ -166,7 +178,8 @@ Every obligation below is written to satisfy: **observable**, **bounded**,
 
 - **Tooling:** At least one web search per topic unless user aborts after tool
   failure; failures are documented, not hidden.
-- **Traceability:** Findings have Source + Relevance; queries are listed.
+- **Traceability:** Findings have Kind + Source + Evidence + Relevance;
+  queries are listed; vendor facts are dated.
 - **Ordering:** Hub priority sort rules above; no arbitrary “importance”
   ordering without hub basis.
 - **Scope:** No scaffolding, no consolidation merges, no Draft→Final flip.
@@ -180,6 +193,10 @@ Every obligation below is written to satisfy: **observable**, **bounded**,
 **Skipping web search.** Tier-1 contract item from the audit (C1). Fabricating
 sources or marking complete without search violates the skill — see **STOP**
 rules above.
+
+**Thin or circular findings.** A heading plus a restated Evidence line is not
+complete. Relevance must add mapping/caveats; Kind must say whether the claim
+can be superseded (vendor) or is our policy.
 
 **Priority ties.** If the hub lacks priority markers, conduct in filesystem order
 **after** verifying with the user or using exploration `research-topics.md`
