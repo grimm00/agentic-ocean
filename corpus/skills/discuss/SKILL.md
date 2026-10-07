@@ -94,9 +94,10 @@ links to demonstrate breadth.
 
 **Flag promotion candidates without promoting.** When the user articulates a new
 concern, identifies a gap in existing research, or proposes a concrete change, name
-it as potentially worth capturing via `/explore --amend`, `/int-opp`, or
-`/research --add-topic`. State the suggestion in chat. Do not run the command. Do
-not write to any file. The user decides.
+it as potentially worth capturing via `/explore --amend`, `/int-opp`,
+`/research --add-topic`, or `/work-blocks` (when dependencies / colocated stores
+argue and the topic feels like one multi-product blob). State the suggestion in
+chat. Do not run the command. Do not write to any file. The user decides.
 
 ## Summary Mode
 
@@ -124,6 +125,7 @@ do NOT write to any file unless the user explicitly asks.
 - [ ] `/explore [topic] --amend "..."` — if a new theme was identified
 - [ ] `/int-opp` — if an internal improvement was identified
 - [ ] `/research [topic] --add-topic N` — if a new research question emerged
+- [ ] `/work-blocks [topic]` — if multi-product / dependency smell appeared
 - [ ] No action needed — if the discussion was purely clarifying
 ```
 
@@ -197,5 +199,7 @@ Use when the user wants to **think without committing**:
 - `/explore` — organize thoughts into themes (creates artifacts)
 - `/research` — investigate specific questions (creates artifacts)
 - `/int-opp` — capture an internal improvement opportunity (creates artifacts)
+- `/work-blocks` — segment multi-product requirements into a walkable map (writes; after substantive discuss)
+- `/capture-discussion` — persist discuss threads/concepts (writes; exits read-only)
 - `/decision` — record an architectural decision (creates artifacts)
 - `/implement` — implement planned work (creates and modifies files; no auto-commit)

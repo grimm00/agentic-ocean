@@ -62,8 +62,9 @@ Use family path detection. Default create path: **Draft** under `.scratch/…/de
 Load:
 
 - Final or live `requirements.md` (required)
-- Optional: `notes/concepts/*`, `notes/threads/*`, quality-attribute catalog
-  (spine hints only)
+- Optional: `notes/concepts/*` (including `*work-blocks*`), `notes/threads/*`,
+  quality catalog — project override if present, else
+  `../references/quality-attributes.md` (spine / Qualities hints only)
 
 If both Draft and Ready exist and the user did not say which is live → stop.
 

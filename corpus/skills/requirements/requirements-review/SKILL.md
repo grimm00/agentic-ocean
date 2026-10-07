@@ -100,3 +100,10 @@ coverage-table row the user handed you, leave it out.
 
 **Partial apply.** Do not land the merges and skip the removals. The proposal
 is one set.
+
+## Related
+
+- **`/work-blocks`** — if review surfaces a multi-product smell (“I don’t know
+  what I’m asking for specifically,” cross-block deps, half-specified stores),
+  suggest a segmentation pass before `/write-plan`. Review itself does not
+  write the work-blocks map.

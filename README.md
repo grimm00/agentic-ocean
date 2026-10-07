@@ -16,7 +16,7 @@ All installable content lives under **`corpus/`** (separated from repo scaffoldi
 
 | Path | Contents |
 |------|----------|
-| `corpus/skills/` | 14 core skills (`commit`, `decision`, `discuss`, `explore`, `handoff`, `int-opp`, `narrative`, `plan-review`, `pre-commit-review`, `reflect`, `research`, `spike`, `update-pr-description`, `write-plan`) |
+| `corpus/skills/` | Core skills including `work-blocks`, `design`, `requirements`, `discuss`, `write-plan`, … (see `corpus/skills/`) |
 | `corpus/commands/` | 20 core commands (workflow: `agent-dispatch`, `task`, `pr-validation`, `post-pr`, `release-*`, `fix-*`, …) |
 | `corpus/agents/` | `group-cycle.agent.md`, `research-orchestrator/` |
 | `corpus/principles/` | Loadable norms (e.g. `documentation-is-ownership`) — equipped by skills/agents at runtime |

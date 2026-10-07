@@ -57,24 +57,23 @@ directory **requirements** / **explore-start** use.
 
 | Structure | Draft (scratch) | Ready (durable) |
 |-----------|-----------------|-----------------|
-| CatdogServices / warm scratch | `.scratch/[area]/[topic]/design.md` | `docs/maintainers/[area]/[topic]/design.md` |
+| Warm scratch + maintainers docs | `.scratch/[area]/[topic]/design.md` | `docs/maintainers/[area]/[topic]/design.md` |
 | Template maintainer | `.scratch/[topic]/design.md` | `docs/maintainers/[topic]/design.md` |
-| Dev-infra feature | under feature scratch if used; else ask | `admin/services/[service]/features/[topic]/design.md` (sibling of Final requirements) |
+| Admin feature tree | under feature scratch if used; else ask | `admin/services/[service]/features/[topic]/design.md` (sibling of Final requirements) |
 
 **Detection order:**
 
 1. If the topic already has Final `requirements.md` on a durable path → Ready
    design lands **beside that file**; Draft still starts under the matching
    `.scratch/…` tree when one exists.
-2. Else if `.scratch/` + `docs/maintainers/` exist → CatdogServices / template row.
-3. Else if `admin/services/` exists → dev-infra row.
-4. Else stop and ask where design.md should live.
+2. Else if `.scratch/` + `docs/maintainers/` exist → warm-scratch / template row.
+3. Else if `admin/services/` exists → admin feature-tree row.
+4. Else stop and ask where design.md should live (do not invent a private layout).
 
 **One live file.** If both Draft and Ready exist, stop and ask which is live
 before editing.
 
-**Topic:** kebab-case (`gaming/recipe-delivery` → area `gaming`, topic
-`recipe-delivery` when the tree is nested).
+**Topic:** kebab-case (`area/topic` → area + topic when the tree is nested).
 
 ### Status
 
@@ -130,9 +129,9 @@ If a cold reader needs the jargon to understand the win, rewrite the win.
 
 When present under the topic, skim for spine hints — do not paste wholesale:
 
-- `notes/concepts/*work-blocks*` or similar segmentation notes
+- `notes/concepts/*work-blocks*` (from `/work-blocks`) or similar segmentation notes
 - `notes/threads/*` discuss captures
-- `.scratch/quality-attribute-catalog.md` (workspace root scratch)
+- Quality catalog (see Quality Attributes below)
 
 ### Commit Discipline
 
@@ -146,10 +145,16 @@ Do not push unless asked.
 
 ### Quality Attributes
 
-If `.scratch/quality-attribute-catalog.md` exists, skim it when filling
-Qualities. Prefer 2–4 attributes for the first win; list deferrals in one
-short bullet or under non-goals — do not expand the design to absorb every
-catalog row.
+Resolve catalog in order:
+
+1. Project override: `.scratch/quality-attribute-catalog.md` if present
+2. Corpus reference: `references/quality-attributes.md` (this skill) —
+   installed as `~/.cursor/skills/design/references/quality-attributes.md`
+
+Skim/select when filling Qualities. Prefer 2–4 attributes for the first win;
+list deferrals in one short bullet or under non-goals — do not expand the
+design to absorb every catalog row. `/work-blocks` may already have a skim;
+reuse it, don’t restart from zero.
 
 ## Gotchas
 
@@ -179,6 +184,8 @@ design. Prefer Final; if only Draft, say so in `Based on:` and get user OK.
 
 ## Related
 
-- **Upstream:** Final `requirements.md`; optional notes / work-blocks
+- **Upstream:** Final `requirements.md`; optional `/work-blocks` map + notes
 - **Downstream:** **write-plan-start** input mode `from_design`
-- **Lateral:** **discuss** before start; **capture-discussion** for notes
+- **Lateral:** **discuss** before start; **capture-discussion** for notes;
+  **work-blocks** for multi-product segmentation before or beside design
+- **Reference:** [`references/quality-attributes.md`](references/quality-attributes.md)

@@ -160,6 +160,7 @@ Flat structure by default. Add folders (`notes/discuss/`, `notes/concepts/`) onl
 ## Related
 
 - **`/discuss`** — the read-only thinking mode this skill captures from.
+- **`/work-blocks`** — when the thread smells multi-product (dependency arguments, colocated stores, “one blob”), prefer or also run `/work-blocks` for the lettered segmentation map. Capture may split a small work-blocks concept, or defer the full map to that skill.
 - **`/handoff`** — for session-end state preservation (different shape: state-of-work-and-what's-next, not content insights).
 - **`/explore`, `/research`, `/decision`** — for promoting content to project-formal artifacts when the discussion outgrows notes.
 - **`/reflect`** — for project-state reflection (different shape: evidence-backed observations from git/PRs/status docs, not learning content).
