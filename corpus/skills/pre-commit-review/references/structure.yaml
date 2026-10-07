@@ -5,9 +5,9 @@ schema_version: 1
 skill: pre-commit-review
 
 invocation_aliases:
-  - id: legacy_command
-    description: Mirrors `.cursor/commands/review.md` slash usage
-    typical_usage: "/review [description] [--scope path] [--all]"
+  - id: primary
+    description: Skill slash invocation (legacy `/review` command removed — that name is Cursor built-in Bugbot/Security)
+    typical_usage: "/pre-commit-review [description] [--scope path] [--all]"
 
 review_roots:
   dev_infra_structure:

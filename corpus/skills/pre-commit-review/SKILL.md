@@ -1,11 +1,11 @@
 ---
 name: pre-commit-review
 description: >-
-  Stage changes, capture a diff for review, and draft a commit message without
-  committing. Hybrid skill: procedural staging plus behavioral diff-review
-  guidance. Preserves the review-then-commit pause — STOP after presenting;
-  never auto-commit. Use when the user invokes pre-commit-review, review, or
-  needs the agentic pre-commit review workflow.
+  Stage changes, capture a diff for staged-change review, and draft a commit
+  message without committing. Preserves the review-then-commit pause — STOP
+  after presenting; never auto-commit. Use when the user invokes
+  /pre-commit-review or wants a staged diff bundle before /commit. Do NOT use
+  for Cursor built-in /review (Bugbot / Security).
 disable-model-invocation: true
 ---
 
@@ -27,11 +27,12 @@ required files, and commit-skill coupling notes live there.
 ## When to use
 
 - After substantive agentic edits and before any commit
-- When the user asks for a staged diff, review folder, or `/review` equivalent
+- When the user asks for a staged diff / review folder before committing
 - When pairing with **commit** — this skill is always the first half
 
 ## When not to use
 
+- Cursor built-in `/review` (Bugbot / Security) — different skill; do not confuse
 - User already committed and only wants a retrospective — use **narrative** or
   changelog workflows instead
 - Pure ideation with no git changes — nothing to stage
