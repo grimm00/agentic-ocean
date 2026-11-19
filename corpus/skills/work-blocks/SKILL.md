@@ -2,7 +2,7 @@
 name: work-blocks
 description: >-
   Segment a multi-product feature into lettered work blocks after substantive
-  Draft requirements and /discuss, before /write-plan. Writes a concept map
+  Draft requirements and /discuss, before /write-plan. Writes work-blocks.md in the topic directory
   (job / status / depends / unblocks, walk order, Gaps, light quality-attribute
   skim). Use when the user invokes /work-blocks, when dependencies or colocated
   concerns argue with each other, or when the topic feels like one blob with
@@ -19,7 +19,7 @@ planning.
 
 ```
 survey artifacts → name the story → cut lettered blocks
-  → Gaps table → quality skim → write concept doc → stop
+  → Gaps table → quality skim → write work-blocks.md in the topic → stop
 ```
 
 This skill **writes**. It is the deliberate companion to `/discuss` (read-only)
@@ -66,27 +66,32 @@ arguments appear.
 |------------|----------|
 | `/work-blocks [topic]` | Segment the named feature/topic |
 | `/work-blocks` | Infer topic from branch, open scratch/notes, or recent discuss |
-| `/work-blocks --dir <path>` | Force notes/concept output directory |
+| `/work-blocks --dir <path>` | Force the output directory |
 
 ---
 
 ## Path resolution
 
-Prefer the project’s existing notes taxonomy. Do **not** invent a new root when
-one already exists:
+The map is a thinking-pipeline artifact for one line of work, so it lives **in that topic's
+directory**, beside `exploration.md`, `requirements.md` and `design.md`. It is not a notes-library
+concept doc. **`read ~/.cursor/principles/artifacts-live-with-the-work.md`** and resolve
+`<thinking_root>` from it, once per invocation.
 
 1. **`--dir <path>`** if passed
-2. **Feature / topic notes** — if the topic already has a notes tree
-   (`notes/concepts/`, or under `.scratch/…/notes/concepts/`, or the repo’s
-   equivalent), write there; create `concepts/` under that notes tree if missing
-3. **Shared scratch notes** — `.scratch/notes/concepts/` when that library exists
-   and the topic is cross-cutting
-4. **Workspace `notes/concepts/`** — only if neither of the above exists
-5. If the layout is unclear → ask once; do not assume a private-repo path
+2. **The topic directory** — `<thinking_root>/<topic>/work-blocks.md`, the same directory
+   explore-start, requirements and design use for this topic. If the topic directory doesn't exist
+   yet, create it (the map can come before an exploration).
+3. **Legacy map in a notes library** — if a `{topic}-work-blocks.md` already exists under a
+   `notes/concepts/` tree, warn, and ask whether to move it into the topic directory or update it
+   in place. Don't migrate silently, and don't create a second map.
+4. If the topic can't be identified → ask once; do not assume a private-repo path
 
-File name: `{topic}-work-blocks.md` (kebab-case, no dates in the filename).
+File name: `work-blocks.md` (the topic is the directory name; no dates in the filename).
 Dates live inside the file as `Created:` / `Updated:`.
 Update in place when the file already exists.
+
+Notes-library docs (threads, concepts) may link to the map, but the map isn't indexed as a
+concept.
 
 ### Quality catalog resolution
 
@@ -104,10 +109,12 @@ Update in place when the file already exists.
 
 Read what exists for the topic (skip missing paths; do not invent content):
 
-- Draft or Final `requirements.md`
-- Topic `notes/threads/`, `notes/concepts/` (or equivalent)
-- Exploration / research summary if present
-- Any prior `{topic}-work-blocks.md` (update in place rather than duplicate)
+- The topic directory: `exploration.md`, `requirements.md` (Draft or Final), `design.md`,
+  research summary, if present
+- Notes-library threads and concepts that discuss the topic (`notes/threads/`, `notes/concepts/`,
+  or the repo's equivalent)
+- Any prior `work-blocks.md` in the topic directory (update in place rather than duplicate), or a
+  legacy `{topic}-work-blocks.md` in a notes library (see Path resolution, 3)
 
 State in chat which artifacts you loaded.
 
@@ -148,6 +155,10 @@ Separate from block status so holes don’t hide inside open discuss threads:
 If a gap later gets an FR, keep the row and mark requirements-done / implement
 open — do not delete history that made the hole visible.
 
+Gaps whose likely home is a new requirement also go in a `Requirements Discovered` list in the
+map, in the requirements family's format (`../requirements/SKILL.md`, **Requirement
+Candidates**), so `/requirements-amend --collect` finds them.
+
 ### 6. Quality-attribute skim (light)
 
 Resolve the catalog (see Path resolution). For each attribute that **bites a
@@ -162,7 +173,7 @@ Qualities when that exists.
 ### 7. Write and stop
 
 1. Read `templates/work-blocks.md`; fill placeholders; omit unused sections
-2. Write/update the concept doc under the resolved `notes/concepts/` path
+2. Write/update `work-blocks.md` in the resolved topic directory
 3. Cross-link parent thread / requirements / related concepts when they exist
 4. Present: path written, block letters + one-line jobs, gap count, suggested
    next letter to walk
@@ -211,7 +222,9 @@ is a Gap (or explicitly “implement open” after FR lock).
 **Full NFR essay during skim.** One line per biting attribute. Catalog deep
 selection is design’s job.
 
-**Inventing a notes root.** Prefer the feature/topic notes tree already in use.
+**Writing the map into a notes library.** It belongs with the topic's other thinking-pipeline
+artifacts, so design, write-plan and `/requirements-amend --collect` find it beside requirements.
+Notes may link to it.
 
 **Amending FRs from this skill.** Name missing FRs in Gaps; leave
 `/requirements-amend` to the user.

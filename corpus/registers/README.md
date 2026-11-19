@@ -28,7 +28,8 @@ and how should we write so they can re-enter cold?*
 
 | Register | Path | Audience | Consumers (must load when writing that audience’s prose) |
 |----------|------|----------|----------------------------------------------------------|
-| Cold-reader operator | [`cold-reader-operator.md`](./cold-reader-operator.md) | Next-week-you / another operator re-entering cold | `write-plan` when Type is Docs/Mixed or Docs Acceptance; durable `docs/maintainers/**` and runbook authoring; `group-cycle` when writing operator-facing docs; PR Summary/Why when the change is operator/platform narrative |
+| Cold-reader operator | [`cold-reader-operator.md`](./cold-reader-operator.md) | Next-week-you / another operator re-entering cold | `write-plan` when Type is Docs/Mixed or Docs Acceptance; durable `docs/maintainers/**` and runbook authoring; `group-cycle` when writing operator-facing docs; PR Summary/Why when the change is operator/platform narrative; `write` for any maintainer or runbook prose; `explain` for in-chat explanations (rules 2–6 only) |
+| Plain informational | [`plain-informational.md`](./plain-informational.md) | Teammates reading team-facing docs for facts | READMEs in team repos; wiki drafts; PR descriptions; ticket and change-request text; meeting agenda items; `write` for any team-facing prose |
 
 ## Adding a register
 
@@ -39,4 +40,4 @@ and how should we write so they can re-enter cold?*
 
 ---
 
-**Last Updated:** 2026-09-03
+**Last Updated:** 2026-10-13

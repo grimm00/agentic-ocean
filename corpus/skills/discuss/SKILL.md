@@ -80,7 +80,11 @@ implementation plan.
 
 **Cite specifically.** Reference findings by topic number ("Topic 3 Finding 2..."),
 documents by section ("the Constraints section says..."), and ADRs by ID. Do not
-speak in generalities when the loaded context contains specifics.
+speak in generalities when the loaded context contains specifics. Refer to code by
+location: file path and line range (`roles/x/files/y:24`), and show the lines when
+they carry the argument. The reader may not have the code in working memory,
+especially when the concept is new, and a description of what a line does with no
+location makes them hunt for it. A file that exists only on a host gets its host path.
 
 **Name genuine concerns; don't manufacture disagreement.** If the user's reasoning
 has a logical gap, an unstated assumption, or contradicts a prior research finding,
@@ -98,6 +102,13 @@ it as potentially worth capturing via `/explore --amend`, `/int-opp`,
 `/research --add-topic`, or `/work-blocks` (when dependencies / colocated stores
 argue and the topic feels like one multi-product blob). State the suggestion in
 chat. Do not run the command. Do not write to any file. The user decides.
+
+**Flag requirement candidates the same way.** When the user states how something must or
+must not behave, or a limit on how it may be built, name it in chat as a requirement candidate
+in the requirements family's format (`../requirements/SKILL.md`, **Requirement Candidates**):
+kind, one-line statement, the user's words, the date. Point at `/capture-discussion` (which
+records it) or `/requirements-amend`. Flag it once; don't pad responses with candidates the user
+didn't state.
 
 ## Summary Mode
 
@@ -120,12 +131,17 @@ do NOT write to any file unless the user explicitly asks.
 1. [Question that surfaced]
 2. [Question that surfaced]
 
+### Requirements Discovered
+
+- [ ] **[FR|NFR|C|A] candidate:** [statement] — *"[user's words]"* (user, YYYY-MM-DD)
+
 ### Suggested Actions
 
 - [ ] `/explore [topic] --amend "..."` — if a new theme was identified
 - [ ] `/int-opp` — if an internal improvement was identified
 - [ ] `/research [topic] --add-topic N` — if a new research question emerged
 - [ ] `/work-blocks [topic]` — if multi-product / dependency smell appeared
+- [ ] `/requirements-amend --collect` — if requirement candidates were flagged and the topic has a `requirements.md`
 - [ ] No action needed — if the discussion was purely clarifying
 ```
 
@@ -193,9 +209,11 @@ Use when the user wants to **think without committing**:
 - The user is ready to make a decision → `/decision`
 - The user needs research conducted → `/research`
 - The user wants to implement something → `/implement`
+- The user needs something explained, not debated → `/explain`
 
 ## Related Skills
 
+- `/explain` — learner-mode companion: explains a concept or finding in layers (read-only; can be invoked mid-discussion, then hands back to peer mode)
 - `/explore` — organize thoughts into themes (creates artifacts)
 - `/research` — investigate specific questions (creates artifacts)
 - `/int-opp` — capture an internal improvement opportunity (creates artifacts)

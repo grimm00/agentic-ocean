@@ -1,6 +1,6 @@
 # Declarative contract for write-plan skill outputs and inputs.
 
-schema_version: 3
+schema_version: 4
 skill: write-plan
 family_members:
   - write-plan-start
@@ -16,18 +16,36 @@ input_modes:
   - id: from_design
     description: design.md or equivalent goals/stages
 
+# Where the planning tree is rooted on disk (topic-first; resolve once per
+# invocation). Planning lives beside the rest of the line of work at
+# <thinking_root>/<topic>/planning/. Root resolution is owned by the
+# artifacts-live-with-the-work principle.
 planning_roots:
-  dev_infra_feature:
-    base_glob: "admin/services/{service}/features/{feature}/"
+  resolution:
+    principle: artifacts-live-with-the-work
+    config_file: "${XDG_CONFIG_HOME:-$HOME/.config}/cursor-skills/config.yaml"
+    key: thinking_root
+    order:
+      - "repos.<slug>.thinking_root (slug = basename of git remote origin, no .git)"
+      - "top-level thinking_root"
+      - "default: .scratch"
+    thinking_root_default: .scratch
+    recommended_tracked_root: docs/maintainers
+  topic_subtree:
+    description: Planning tree beside exploration.md / research/ / decisions/
+    base_glob: "{thinking_root}/{topic}/"
     default_subdir: planning
     staged_planning_subdir_pattern: "planning-stage{N}/"
-  catdog_scratch_feature:
-    description: CatdogServices-style project/feature scratch
-    base_glob: "{project}/{feature}/"
-    default_subdir: planning
-    staged_planning_subdir_pattern: "planning-stage{N}/"
-  template_project:
-    base_glob: "docs/maintainers/planning/features/{feature}/"
+    notes: |
+      N is a 1-based positive integer (1, 2, 3, …). Directory name is literal prefix
+      "planning-stage" plus decimal digits (no zero-padding required): planning-stage3,
+      planning-stage12, etc.
+  legacy_artifact_first:
+    description: Pre-config layouts. Work in place if a plan already exists there; do not migrate silently.
+    base_globs:
+      - "docs/maintainers/planning/features/{feature}/"
+      - "admin/services/{service}/features/{feature}/planning/"
+      - "{project}/{feature}/planning/"
 
 start_output:
   skill_invocation: write-plan-start

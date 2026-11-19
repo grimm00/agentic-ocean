@@ -62,7 +62,7 @@ Use family path detection. Default create path: **Draft** under `.scratch/…/de
 Load:
 
 - Final or live `requirements.md` (required)
-- Optional: `notes/concepts/*` (including `*work-blocks*`), `notes/threads/*`,
+- Optional: the topic's `work-blocks.md`, `notes/concepts/*`, `notes/threads/*`,
   quality catalog — project override if present, else
   `../references/quality-attributes.md` (spine / Qualities hints only)
 

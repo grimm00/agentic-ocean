@@ -2,7 +2,7 @@
 
 **Id:** `cold-reader-operator`  
 **Status:** Active  
-**Last Updated:** 2026-09-03
+**Last Updated:** 2026-10-13
 
 **Audience:** Next-week-you, or another operator, opening the doc **cold** — they
 did not just finish the chat that built the system.
@@ -10,7 +10,7 @@ did not just finish the chat that built the system.
 **Consumers (hard-require when writing this audience’s prose):** write-plan
 (Docs / Mixed cohorts and Docs Acceptance); durable maintainer docs and
 runbooks; group-cycle when emitting operator-facing docs; PR Summary/Why for
-platform/operator changes.
+platform/operator changes; explain (rules 2–6 only, for in-chat explanations).
 
 **Load:** `read ~/.cursor/registers/cold-reader-operator.md` before drafting or
 expanding that prose.
@@ -62,6 +62,9 @@ nouns, but **define lab slang** and **link official product docs** on first use.
 - Expert-only HCL Steps aimed at someone mid-apply who already has the mental
   model (still avoid pure identifier stew — write-plan Steps prose still applies).
 - `/discuss` scratch thinking — no durable audience yet.
+- The document shape (rule 1, Start here) for `/explain`. An in-chat
+  explanation has a reader but no durable doc, so `/explain` applies only
+  rules 2–6 — the reading discipline, not the layout.
 
 ## Pairing
 

@@ -129,7 +129,8 @@ If a cold reader needs the jargon to understand the win, rewrite the win.
 
 When present under the topic, skim for spine hints — do not paste wholesale:
 
-- `notes/concepts/*work-blocks*` (from `/work-blocks`) or similar segmentation notes
+- `work-blocks.md` in the topic directory (from `/work-blocks`), or a legacy
+  `notes/concepts/*work-blocks*` map
 - `notes/threads/*` discuss captures
 - Quality catalog (see Quality Attributes below)
 

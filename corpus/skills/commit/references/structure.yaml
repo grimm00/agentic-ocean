@@ -1,7 +1,7 @@
 # Declarative contract for commit skill — procedural review consume + cleanup.
 # Read alongside SKILL.md; YAML wins if any prose drifts.
 
-schema_version: 2
+schema_version: 3
 skill: commit
 
 upstream_review_contract:
@@ -13,15 +13,32 @@ upstream_review_contract:
 
 consumes_review_artifacts:
   required_files:
-    - filename: summary.md
-      role: >-
-        SOURCE for draft commit message under heading matching skill prose
-        (“## Draft Commit Message” section per pre-commit-summary template).
-      optional_extracts:
-        - files_changed_list_for_confirmation
+    - filename: commit-msg.txt
+      role: Draft message; passed to `git commit -F`. A bundle without it has nothing pending.
   optional_files:
+    - path: summaries/<newest>.md
+      role: >-
+        Fallback source for the draft commit message (“## Draft Commit Message” section) when
+        commit-msg.txt is absent; source for the files-changed list.
     - filename: diff.patch
-      role: Line-level corroboration if staged snapshot appears stale versus summary.
+      role: Line-level corroboration if staged snapshot appears stale versus the summary.
+    - filename: summary.md
+      role: Message fallback in a legacy per-commit review-<desc>-<date>/ folder
+
+deletes_after_commit:
+  default:
+    - commit-msg.txt
+    - diff.patch
+  never_deletes: the bundle folder itself; removing it is manual, after the PR merges or the line of work ends
+  legacy_folders: a review-<desc>-<date>/ folder without summaries/ is deleted whole
+
+never_touches:
+  - path: summaries/
+    reason: Per-commit record that pr-body.md is reconciled against; survives context loss
+  - filename: pr-body.md
+    reason: Rolling PR body read by the pr skill
+  - path: plan-comments/
+    reason: Queued and posted IaC plan comments owned by the pr skill
 
 review_folder_resolution_modes:
   - id: same_session
@@ -29,6 +46,10 @@ review_folder_resolution_modes:
     precedence: highest
   - id: explicit_name
     description: User passes folder token matching review dirname tail
+  - id: current_branch
+    description: >-
+      review-<branch-slug>/ for `git branch --show-current` on a feature branch; on the default
+      branch, the review-<description>/ bundle holding a commit-msg.txt (ask if several do)
   - id: auto_latest
     description: Newest lexicographic/mtime ordering across artifact bases from upstream contract
 
@@ -36,16 +57,18 @@ artifact_bases_must_match_upstream: true
 
 git_commands:
   staged_stat: git diff --staged --stat
+  commit: git commit -F <bundle>/commit-msg.txt
   last_commit_preview: git log -1 --oneline
 
 cli_options:
   - flag: "--no-delete"
-    effect: Retain transient review folder after successful commit
+    effect: Keep commit-msg.txt and diff.patch (and the bundle) after a successful commit
   - flag: "--message"
-    effect: Override draft parsed from summary.md
+    effect: Override the draft from commit-msg.txt
 
 outputs:
   - id: git_commit
     description: Conventional-commit message executed on repository
   - id: transient_review_cleanup
-    description: Deleted review-* folder unless --no-delete
+    description: >-
+      Deleted commit-msg.txt and diff.patch unless --no-delete; the bundle folder is never deleted

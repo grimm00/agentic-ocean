@@ -37,17 +37,29 @@ enforced by the platform.
 
 ### Path Detection
 
-Explorations live in different locations depending on project structure. Detect
-once and use consistently within a single invocation:
+Lines of work are **topic-first**: one directory per line of work, named for the
+topic, with `exploration.md` standing at its root and `research/`, `planning/`,
+`decisions/`, `narratives/`, and `spike/` as sibling subdirectories created by
+downstream skills.
 
-| Structure | Explorations path |
-|-----------|-------------------|
-| Dev-infra | `admin/services/[service]/explorations/[topic]/` |
-| Template project | `docs/maintainers/explorations/[topic]/` |
+```
+<thinking_root>/<topic>/exploration.md
+<thinking_root>/<topic>/research-topics.md
+<thinking_root>/<topic>/research/      # created later by /research
+<thinking_root>/<topic>/decisions/     # created later by /decision
+<thinking_root>/<topic>/planning/      # created later by /write-plan
+```
 
-**Detection rule:** if `admin/services/` exists, use dev-infra paths; otherwise
-use template project paths. Explorations are top-level peers of `planning/`,
-`research/`, and `decisions/` — never nested under `planning/`.
+Before creating the first artifact, **`read ~/.cursor/principles/artifacts-live-with-the-work.md`**
+and resolve `<thinking_root>` from it (config key `thinking_root`, default
+`.scratch`) — once per invocation, then use it consistently.
+
+Explorations are top-level peers of `planning/`, `research/`, and `decisions/` —
+never nested under `planning/`.
+
+**Legacy layouts** — `docs/maintainers/explorations/<topic>/` and
+`admin/services/<service>/explorations/<topic>/`. If a topic already exists at one
+of these, warn and work in place rather than splitting it; do not migrate silently.
 
 ### Output Sizing
 
@@ -64,8 +76,13 @@ amend, or implement directly.
 
 ### Commit Discipline
 
-Explore skills create documentation artifacts. Commits use `docs(explore):` scope
-and can push directly to the current branch (no PR required for docs-only changes).
+Explore skills create documentation artifacts, so `<thinking_root>` decides whether
+there is a commit at all:
+
+- **Tracked** (e.g. `docs/maintainers`) — `docs(explore):` scope, pushed directly to
+  the current branch (no PR required for docs-only changes).
+- **Gitignored** (the `.scratch` default) — the artifacts are intentionally
+  untracked. Skip the commit and stop after writing the files.
 
 ### Topic Naming
 

@@ -6,9 +6,7 @@ and Follow-ups sections, then updates the PR body via `gh`.
 
 ## Installation
 
-```bash
-/plugin install update-pr-description@drw-up-claude-marketplace
-```
+Installed into `~/.cursor/skills/` by this repo's `install.sh`.
 
 ## Prerequisites
 
@@ -57,4 +55,4 @@ if that heading exists, asks you to choose if the body has content but no
 
 ## Author
 
-Cameron Wilson (cdwilson@drwholdings.com)
+grimm00

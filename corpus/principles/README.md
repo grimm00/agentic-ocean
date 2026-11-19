@@ -32,7 +32,10 @@ context lives — then apply that norm while executing.
 
 | Principle | Path | Consumers (must load) |
 |-----------|------|------------------------|
-| Documentation is ownership | [`documentation-is-ownership.md`](./documentation-is-ownership.md) | `write-plan` (parent + setup + expand), `plan-review`, `group-cycle` agent; also `/pr`, `/post-pr`, `/pr-validation`, `/task*` commands when those workflows assert Done |
+| Documentation is ownership | [`documentation-is-ownership.md`](./documentation-is-ownership.md) | `write-plan` (parent + start + amend), `plan-review`, `group-cycle` agent; also `/pr`, `/post-pr`, `/pr-validation`, and `implement` when those workflows assert Done |
+| Artifacts live with the work | [`artifacts-live-with-the-work.md`](./artifacts-live-with-the-work.md) | `explore` (parent), `write-plan` (parent), `capture-discussion` |
+| Code and docs describe the present | [`describe-the-present.md`](./describe-the-present.md) | `write`, `docs-pass` |
+| Each fact has one home | [`each-fact-has-one-home.md`](./each-fact-has-one-home.md) | `docs-pass` |
 
 ## Adding a principle
 
@@ -43,4 +46,4 @@ context lives — then apply that norm while executing.
 
 ---
 
-**Last Updated:** 2026-09-03
+**Last Updated:** 2026-11-03

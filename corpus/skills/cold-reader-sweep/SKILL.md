@@ -29,6 +29,8 @@ scope the pages → read each page against the files it names → report → sto
 - Authoring a new plan or requirements
 - Rewriting historical narrative or archived plans on purpose
 - A full editorial pass on tone with no claim that a page is wrong
+- Deciding where the docs for a change in flight belong (comment, README, wiki,
+  PR). Use `docs-pass`, which runs these same checks on the pages a branch touches
 
 ## Scope
 

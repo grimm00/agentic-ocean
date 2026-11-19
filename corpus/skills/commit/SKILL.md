@@ -1,8 +1,10 @@
 ---
 name: commit
 description: >-
-  Finalize staged work after pre-commit-review: confirm draft commit message,
-  run git commit, optionally remove transient review artifacts. Procedural twin
+  Finalize staged work after pre-commit-review: confirm the draft message from
+  commit-msg.txt, run git commit -F, and delete commit-msg.txt and diff.patch
+  from the review bundle. Never deletes the bundle, its summaries or the PR
+  body. Procedural twin
   to pre-commit-review — never substitutes review judgement. Honors same-session,
   explicit folder, and auto-detect resolution paths.
 disable-model-invocation: true
@@ -44,13 +46,20 @@ pre-commit-review  →  STOP + human pause  →  commit (this skill)
 
 **Review artifact roots (mirror pre-commit-review detection order):**
 
-1. **Dev-Infra:** `admin/tmp/reviews/`
-2. **Template:** `tmp/reviews/`
-3. **Lightweight:** `tests/tmp/reviews/`
+1. **Scratch space:** `<thinking_root>/reviews/` (`thinking_root` from
+   `~/.config/cursor-skills/config.yaml`, default `.scratch`), when it exists
+2. **Legacy fallbacks**, for repos with no scratch space: `admin/tmp/reviews/`, then
+   `tmp/reviews/`, then `tests/tmp/reviews/`
 
 **Folder basename pattern:** See upstream `artifact_folder.dirname_pattern` in **`pre-commit-review/references/structure.yaml`**.
 
-**Required coupling files inside folder:** `summary.md` (**draft message** primary); `diff.patch` optional corroboration.
+**Coupling files inside the bundle:** `commit-msg.txt` (**draft message**, preferred); the newest
+file in `summaries/` (fallback for the message, and the files-changed list); `diff.patch`
+optional corroboration.
+
+**Out of scope:** the bundle's branch artifacts — `summaries/`, `pr-body.md`, `plan-comments/`.
+They span every commit in the bundle and feed **pr**. This skill deletes only `commit-msg.txt`
+and `diff.patch`.
 
 ---
 
@@ -69,8 +78,8 @@ pre-commit-review  →  STOP + human pause  →  commit (this skill)
 | Invocation | Behavior |
 |------------|----------|
 | (none) | Auto-resolve folder via precedence in `references/structure.yaml` (`review_folder_resolution_modes`) |
-| `review-topic-YYYY-MM-DD` tail | Narrow search to matching folder |
-| `--no-delete` | Keep transient review artifacts post-commit |
+| `review-<name>` name or tail | Narrow search to matching bundle |
+| `--no-delete` | Keep `commit-msg.txt` and `diff.patch` (and the bundle) post-commit |
 | `--message "…"` | Skip draft extraction; still show stat + confirm |
 
 ---
@@ -81,15 +90,20 @@ pre-commit-review  →  STOP + human pause  →  commit (this skill)
 
 1. **Same-session:** If assistant already holds `{review_folder_path, draft_message}` from immediate prior **pre-commit-review**, reuse without disk read when still valid.
 2. **Explicit token:** Match user-supplied substring against basename under each artifact root.
-3. **Auto-latest:** Shell-equivalent aggregation `ls -dt <root>/review-*/ … | head -1` respecting detection order above.
+3. **Current branch:** on a feature branch, `<root>/review-<branch-slug>/`, where the slug is `git branch --show-current` with `/` replaced by `-`. On the default branch, the `review-<description>/` bundle that holds a `commit-msg.txt`; if more than one does, ask.
+4. **Auto-latest:** Shell-equivalent aggregation `ls -dt <root>/review-*/ … | head -1` respecting detection order above.
+
+A bundle with no `commit-msg.txt` has nothing pending to commit; skip it.
 
 If multiple ambiguous candidates remain without session hints → prompt user — **do not guess**.
 
 Stop + warn when **no candidate** directories exist → suggest rerun **pre-commit-review**.
 
-### 2. Read summary (`summary.md`)
+### 2. Read the draft message
 
-Unless `--message`, parse **Draft Commit Message** section contents.
+Unless `--message`, use `commit-msg.txt`. If it's missing, parse the **Draft Commit Message**
+section of the newest file in `summaries/` (or of `summary.md` in a legacy per-commit
+`review-<desc>-<date>/` folder).
 
 Skip disk read entirely when trusted session carries identical payload.
 
@@ -119,20 +133,27 @@ Await explicit confirmation or inline edits **before** `git commit`.
 
 ### 5. Commit
 
-Use heredoc or equivalent safe quoting for multi-line conventional commits:
+Commit from a file, so the body stays separate from the subject:
 
 ```bash
-git commit -m "$(cat <<'EOF'
-[user confirmed body]
-EOF
-)"
+git commit -F [review-folder]/commit-msg.txt
 ```
+
+If the user edited the message or passed `--message`, write the confirmed text to
+`commit-msg.txt` first, then commit with `-F`. Don't pass a multi-line message through `-m`.
 
 ### 6. Cleanup
 
-Unless `--no-delete`, remove resolved review directory (`rm -rf path`).
+Unless `--no-delete`:
 
-Echo kept path when retaining.
+| Bundle state | Delete |
+|---|---|
+| Any `review-<name>/` bundle | `commit-msg.txt` and `diff.patch` only. Keep the folder, `summaries/`, `pr-body.md`, `plan-comments/` |
+| Legacy `review-<desc>-<date>/` folder (no `summaries/`) | The whole folder |
+
+Echo what was kept. On a feature branch, suggest `/pr` once the branch is ready. Removing the
+bundle itself is a manual step after the PR merges, or after the line of work ends on the
+default branch.
 
 ### 7. Present result
 
@@ -149,11 +170,13 @@ Compact mental model:
 
 ```text
 pre-commit-review ──► STOP + human ──► commit ──► working tree progressing
+        │                                 (repeat per commit)
+        └── review-<name>/summaries/ + pr-body.md grow ──────────────► pr
 ```
 
 **Same-session optimum:** eliminates rediscovery latency.
 
-**Cross-session:** deterministic folder search + **`summary.md`**.
+**Cross-session:** deterministic bundle search + the newest file in **`summaries/`**.
 
 ---
 
@@ -163,6 +186,8 @@ pre-commit-review ──► STOP + human ──► commit ──► working tree
 - **Stale staging** is frequent when switching branches mid-review — escalate instead of silently committing wrong files.
 - **Multiple reviews:** auto-latest may surprise — prefer explicit basename in busy repos.
 - **`.gitignore` gaps:** transient folders must remain ignored upstream; committing skill does not fix ignore tables.
+- **Deleting bundle artifacts:** `summaries/`, `pr-body.md`, and `plan-comments/` outlive every commit. Cleanup never deletes the bundle; the summaries are the only record of earlier commits that survives context loss.
+- **Collapsed commit bodies:** a multi-line `-m` can flatten into one subject line. Always `-F`.
 
 ---
 

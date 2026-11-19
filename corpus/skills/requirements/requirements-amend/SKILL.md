@@ -23,6 +23,23 @@ renumber. Do not set status to Final.
   exists.
 - Research recorded a candidate under **Requirements Discovered** and the user
   wants it in the document.
+- `--collect`: gather every unticked candidate across the topic and promote the ones the user
+  picks (see below).
+
+## Collect mode (`--collect`)
+
+Candidates follow the family's **Requirement Candidates** convention (`../SKILL.md`).
+
+1. Search the topic directory (exploration, research topics, `work-blocks.md`, `design.md`,
+   `planning/`, `decisions/`) and any
+   captured notes that link to the topic for headings named `Requirements Discovered`. Read each
+   unticked `- [ ]` candidate.
+2. List them in chat: kind, text, source file, date. Mark likely duplicates of existing IDs, but
+   don't merge them.
+3. Ask which to promote, edit, or skip. Promote nothing the user didn't choose.
+4. For each promoted candidate, write the next ID as in step 2 below, with **Source** naming the
+   file it came from. Then tick it in its source file: `- [x] … → FR-n`.
+5. Leave skipped candidates unticked. Stop as in step 4.
 
 ## Workflow
 

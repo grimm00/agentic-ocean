@@ -2,7 +2,7 @@
 
 **Id:** `documentation-is-ownership`  
 **Status:** Active  
-**Last Updated:** 2026-09-03
+**Last Updated:** 2026-11-03
 
 **Consumers (hard-require):** write-plan family · plan-review · group-cycle agent ·
 PR / post-PR / pr-validation / task workflows when asserting Done.
@@ -19,8 +19,8 @@ group complete.
 trust boundaries, or public contracts is incomplete until durable documentation
 reflects it — same bar as tests green or plan applies clean.
 
-**Flip side (same principle):** code comments stay **thin** and local. Docs and
-PR bodies do the heavy lifting for narrative context. Comments earn their keep
+**Flip side (same principle):** code comments stay **thin** and local. Docs
+carry the narrative context; PR bodies carry intent and history. Comments earn their keep
 when they prevent a lived failure or carry operator-facing plan/apply errors;
 they must not re-host architecture essays that will drift.
 
@@ -36,8 +36,12 @@ they must not re-host architecture essays that will drift.
    doc; otherwise append the hub/index. Cross-link both ways.
 4. **Thin HCL/code comments** — one-line file role or pointer to docs; keep
    apply/runtime hazards inline; put FR/NFR essays and “why this design” in docs.
-5. **PRs carry context** — PR Summary/Why explain intent; do not rely on comment
-   archaeology in the diff.
+   Which surface each fact belongs on is `each-fact-has-one-home`; `docs-pass`
+   applies it before review.
+5. **PRs carry intent and history** — PR Summary/Why explain what changed and
+   why; do not rely on comment archaeology in the diff. Verification evidence
+   stays in scratch (the PR says what was verified and where), and architecture
+   goes in durable docs.
 
 ## WIP
 

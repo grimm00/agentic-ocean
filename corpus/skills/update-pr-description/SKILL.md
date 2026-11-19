@@ -65,6 +65,12 @@ context and note the PR is large. Focus on the most significant changes.
 
 ## Step 2: Generate description
 
+**Hard-require:** `read ~/.cursor/registers/plain-informational.md` before drafting any
+section. PR descriptions are an explicitly named consumer of that register, and the quality
+guidelines below don't restate its sentence-level rules (no em-dash as a structural connective,
+bold leads as complete sentences, no slogan shapes). If the register file can't be read, stop and
+say so rather than drafting from memory.
+
 Produce four managed sections:
 
 ```markdown

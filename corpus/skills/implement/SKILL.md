@@ -140,7 +140,10 @@ When stopping (end of bare run, end of single task, or operator pause):
 1. `git status` and `git diff` (per affected repo)
 2. Short summary of intent + file list (group by task if bare ran many)
 3. **Suggested** commit message(s) — one per logical chunk is fine; do not run them
-4. Explicit: review → ask to commit (or `/commit`) → `/implement` again if backlog remains
+4. If the diff adds or changes comments, READMEs, or behavior a wiki page describes,
+   suggest `/docs-pass` before review. Working comments (FR IDs, long rationale)
+   are fine until then; the pass trims them.
+5. Explicit: review → ask to commit (or `/commit`) → `/implement` again if backlog remains
 
 ### 5. Plan checkboxes (working tree)
 
@@ -175,7 +178,7 @@ still-unchecked task (do not re-do completed checkboxes).
 ✅ Task N implemented: …
    Diff: … · Suggested commit: …
    Operator: <none | steps above>
-   Next: review → commit if you want → /implement next|bare
+   Next: /docs-pass if docs are touched → review → commit if you want → /implement next|bare
 ```
 
 **Bare (batch) finished or paused:**
@@ -185,7 +188,7 @@ still-unchecked task (do not re-do completed checkboxes).
    Paused: <none | operator gate on Task K | blocker>
    Remaining: <none | list>
    Diff: … · Suggested commit(s): …
-   Next: review → commit if you want → /implement (resume) or --status
+   Next: /docs-pass if docs are touched → review → commit if you want → /implement (resume) or --status
 ```
 
 ---
@@ -215,5 +218,6 @@ When **all** feature tasks are done:
 
 - **write-plan** / **write-plan-amend** — create or amend the plan
 - **plan-review** — readiness before a group
+- **docs-pass** — trims comments and routes docs to README, wiki, and PR before review
 - **commit** / **pre-commit-review** — after human approval
 - **handoff** — session state, not task execution

@@ -1,7 +1,7 @@
 # Declarative contract for review skill — paths, artifact shape, coupling hooks.
 # Read alongside SKILL.md; YAML wins if any prose drifts.
 
-schema_version: 1
+schema_version: 3
 skill: pre-commit-review
 
 invocation_aliases:
@@ -10,6 +10,17 @@ invocation_aliases:
     typical_usage: "/pre-commit-review [description] [--scope path] [--all]"
 
 review_roots:
+  # Checked in this order; the first match wins.
+  scratch_structure:
+    description: >-
+      Default. Reviews live in the repo's scratch space, beside handoffs and lines of work.
+      thinking_root comes from ${XDG_CONFIG_HOME:-$HOME/.config}/cursor-skills/config.yaml
+      (repos.<origin-slug>.thinking_root, else the global thinking_root, else ".scratch").
+    detect_when:
+      - path_exists: "{thinking_root}"
+      - and_gitignored: "{thinking_root}/reviews/"
+    artifact_base_dir: "{thinking_root}/reviews"
+  # Legacy fallbacks, only for repos without a scratch space:
   dev_infra_structure:
     description: Dev-infra repos with admin staging layout
     detect_when:
@@ -28,19 +39,77 @@ review_roots:
     artifact_base_dir: tests/tmp/reviews
 
 artifact_folder:
-  dirname_pattern: "review-{description}-{yyyy}-{mm}-{dd}"
+  dirname_pattern:
+    feature_branch: "review-{branch_slug}"
+    default_branch: "review-{description}"
+  branch_slug: branch name with "/" replaced by "-" (feat/vault-prod → review-feat-vault-prod)
+  description: >-
+    Kebab-case name for the line of work, from the invocation or derived from the changed files
+    (e.g. review-closed-tickets-to-completed). Used on the default branch (main, master, or
+    origin/HEAD), where the branch name says nothing about the work. Reuse an existing
+    review-{description} bundle when the same line of work continues.
+  scope: >-
+    One line of work across all its commits: the branch on a feature branch, the description on
+    the default branch.
   gitignore_required: true
   notes: |
     Caller MUST verify `.gitignore` covers the chosen base. If not covered,
     warn the user before writing artifacts.
 
-required_artifacts:
-  - filename: summary.md
-    role: Human-readable summary; copy from ../assets/summary-template.md then fill
-    coupling_note: Parsed or reused by downstream commit workflows in the same session
-  - filename: diff.patch
-    role: Staged diff capture via `git diff --staged` redirected to file
-    coupling_note: Source of truth for line-level review alongside summary
+per_commit_artifacts:
+  description: Rewritten on every run; the commit skill deletes both after committing.
+  files:
+    - filename: commit-msg.txt
+      role: Draft commit message (subject, blank line, wrapped body) for `git commit -F`
+    - filename: diff.patch
+      role: Staged diff capture via `git diff --staged` redirected to file
+
+branch_artifacts:
+  description: Kept across commits; the commit skill never deletes them.
+  files:
+    - path: summaries/YYYY-MM-DD-{description}.md
+      role: >-
+        One per commit, from ../assets/summary-template.md. Never overwritten: a second commit
+        with the same date and description gets a -2, -3 … suffix.
+      coupling_note: >-
+        The durable per-commit record. pr-body.md is reconciled against the full set, so the
+        PR body can be rebuilt after context loss.
+    - filename: pr-body.md
+      role: Rolling PR body, merged and condensed on each run
+      when: >-
+        Always. Created on the first run if the bundle has none, then merged on every later run.
+        It is not a lifecycle signal: its presence doesn't decide what commit deletes.
+      format_owner: the repo's PR-description skill (update-pr-description or a repo variant)
+      rules:
+        - describes the branch as a whole, not a list of commits
+        - reconciled against every file in summaries/, not only the current commit
+        - condense as it grows; readable in about 20 seconds
+        - raw plan output stays out; state the result and point at the plan comment
+    - path: plan-comments/YYYY-MM-DD-{description}.md
+      role: Infrastructure-as-code plan output queued as a PR comment
+      when: IaC change with a plan (Terraform, OpenTofu)
+      rules:
+        - result line first, full plan inside <details>
+        - text captured with -no-color, or `terraform show -no-color <planfile>`; never a binary plan file
+        - include the follow-up plan and read-back if already applied
+    - path: plan-comments/posted/
+      role: Comments the pr skill has posted; kept as a record, not re-posted
+    - path: wiki-drafts/{page-slug}.*
+      role: >-
+        Draft of a wiki change in the wiki's native format, with a readable {page-slug}.md beside it
+      when: The docs-pass skill routed facts to a wiki page and the user confirmed the row
+      written_by: docs-pass (../docs-pass/SKILL.md); this skill doesn't write or read it
+      rules:
+        - publishing to the wiki needs an explicit per-page OK; a draft here is not published
+        - commit never deletes these; remove them with the bundle after merge
+
+lifecycle:
+  after_commit: >-
+    The commit skill deletes commit-msg.txt and diff.patch, and nothing else. The folder, its
+    summaries/, pr-body.md, plan-comments/ and wiki-drafts/ stay.
+  after_merge: >-
+    Remove the folder by hand once the PR merges (the pr skill reminds), or, for a
+    default-branch bundle, once the line of work is finished.
 
 git_expectations:
   staged_diff_source: git diff --staged
@@ -53,3 +122,6 @@ integration:
     notes: >
       Declare filenames here so commit SKILL can depend on stable names/paths.
       Companion commit YAML points back via upstream_review_contract for paired edits.
+  pr_skill:
+    description: Reads pr-body.md and summaries/; posts queued plan comments
+    skill_relative: ../pr/SKILL.md

@@ -118,6 +118,29 @@ An explicit removal during amend leaves a tombstone instead of a hole:
 
 `### FR-3: removed YYYY-MM-DD — [why]`
 
+### Requirement Candidates
+
+Other skills find requirements before this family numbers them: research, discuss, capture,
+explore, work-blocks. They record **candidates**, never IDs, under a heading named exactly
+`Requirements Discovered` in their own artifact (or, for read-only skills, in chat):
+
+```markdown
+## Requirements Discovered
+
+- [ ] **FR candidate:** The portal refers to an automation job by a declared key, not the scheduler's database ID.
+  *"The app should need just to say 'I need this job that does this'"* (user, 2026-11-02)
+```
+
+- **Kind** is one of `FR`, `NFR`, `C`, `A` candidate, using the same classification as setup.
+- Quote the user's words when the candidate came from them. Name the source and date.
+- **requirements-amend** promotes a candidate to an ID and ticks it with a pointer:
+  `- [x] … → FR-3`. The unticked list is the backlog of unreviewed candidates.
+- A skill that finds a candidate never writes `requirements.md` itself. Numbering stays here.
+
+Signal phrases worth flagging: "should", "must", "needs to", "shouldn't", "never", "only if",
+when they describe behavior, a quality bar, or a limit, and not a preference about the
+conversation.
+
 ### Commit Discipline
 
 Do not commit a Draft. It is under `.scratch/`.

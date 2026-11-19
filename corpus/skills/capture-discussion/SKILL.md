@@ -39,13 +39,14 @@ This is the deliberate companion to `/discuss`. The discuss skill is read-only b
 
 ## Configuration
 
-### Default notes location
+### Notes location
 
-`notes/` at workspace root. Create with `mkdir -p notes/` if missing.
+Resolve the notes root per **`read ~/.cursor/principles/artifacts-live-with-the-work.md`**
+— config key `notes_root`, default `notes/` at workspace root, with `--dir <path>` as
+the explicit override that wins over everything. Create with `mkdir -p` if missing.
 
-### Override
-
-`--dir <path>` to use a different location.
+Notes are a **standalone library**, not a topic subtree: they outlive any one line of
+work, so they are rooted separately from `thinking_root` and stay flat.
 
 ### File naming
 
@@ -66,8 +67,23 @@ Read the contents of the resolved notes directory. Identify:
 - Existing thread-record files (cover whole `/discuss` threads)
 - Existing concept docs (cover single foundational concepts)
 - Their cross-reference structure
+- **Registers, if the library has any** (e.g. `concerns/`, `doc-gaps/`, `cleanups/`, each with a
+  `README.md` index). Read each register's index and its "Adding one" rules: ID scheme, statuses,
+  families or groups.
 
 If the directory doesn't exist, create it.
+
+**Register check.** Registers hold items that owe something (a decision, an edit, a document, an
+action), and they exist so those items carry a status. For each thing the discussion surfaced:
+
+- **Already registered?** Search the register indexes and entries for it. If an entry exists,
+  update its status and add a dated note to it; don't create a second entry.
+- **Owes something nobody has picked up?** Propose a register entry in the register that matches
+  what's owed (a concern owes a decision; a doc gap owes an edit or a document; a cleanup owes an
+  action), using that register's next ID and format.
+- **Cited only as an example?** When the discussion finds that a specific instance is mentioned in
+  threads or concepts only to illustrate a lesson, check it also has a register entry with a status.
+  An instance that only illustrates a lesson stops being tracked once the lesson is written down.
 
 ### 2. Identify capture scope
 
@@ -85,6 +101,7 @@ What is being captured?
 | Substantive standalone concept (foundational, likely referenced from elsewhere) | New concept doc + brief summary in thread-record linking to it |
 | Multiple concepts emerged | Multiple concept docs, brief summary in thread-record for each |
 | No existing thread-record and the discussion was substantial | New thread-record (+ any concept docs that split out) |
+| The discussion surfaced something that owes a decision, edit, document or action | Register entry (new, or a dated update to an existing one), plus a link to it from the thread or entry where it came up |
 
 **The splitting test:** *If you can imagine future-you (or another agent) wanting to link to this concept without the thread context, split it out into its own doc.*
 
@@ -98,6 +115,14 @@ Use the templates:
 - **Concept doc** → `templates/concept-doc.md` (standalone foundational concept doc)
 
 Read each template once at the start of composition; don't re-read per file. Replace placeholders with actual content; omit sections that don't apply.
+
+### 4b. Requirements Discovered
+
+If the thread produced requirement candidates (flagged by `/discuss`, or statements of how
+something must or must not behave), add a `Requirements Discovered` section to the thread record or
+session being written, in the requirements family's format (`../requirements/SKILL.md`,
+**Requirement Candidates**). Keep the user's words. Never write `requirements.md`; if the topic has
+one, suggest `/requirements-amend --collect` in chat. Omit the section when there are no candidates.
 
 ### 5. Cross-reference
 

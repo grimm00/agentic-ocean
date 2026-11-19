@@ -118,6 +118,15 @@ research-topics.md.
 
 ---
 
+## Requirements Discovered
+
+*(Optional. Only statements the input already phrases as a rule: what must or must not happen.
+Format: `../../requirements/SKILL.md`, Requirement Candidates. Omit the section if there are none.)*
+
+- [ ] **[FR|NFR|C|A] candidate:** [statement] — *"[user's words]"* (user, YYYY-MM-DD)
+
+---
+
 ## 🧪 Spike Determination
 
 | Topic | Risk Level | Spike? | Rationale |

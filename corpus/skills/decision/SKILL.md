@@ -34,7 +34,7 @@ recommended alternative set (see behavioral contract).
 
 - Research scaffolding missing substantive findings → **`research-setup`** instead.
 - Ideation wanting zero records → **`discuss`** until intent firms.
-- Need implementation task breakdown afterwards → **`write-plan-setup`** / execution flows.
+- Need implementation task breakdown afterwards → **`write-plan-start`** / execution flows.
 
 ---
 
@@ -138,7 +138,7 @@ Observable / bounded / outcome-framed / delta-only interpretations align with St
 - Silent interview skips — yields mis-prioritized ADR waterfalls.
 - **Placeholder ADRs** masquerading as finished — placeholders belong in drafts branches only.
 - Merged winner hallucination — rewind to enumerated trade space if critique absent.
-- **Planning bleed:** never mint `implementation-plan.md` herein — escalate to **`write-plan-setup`**.
+- **Planning bleed:** never mint `implementation-plan.md` herein — escalate to **`write-plan-start`**.
 
 Asset pointers keep templates versioned beside skill instructions for FR-8 self-containment.
 
